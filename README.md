@@ -16,10 +16,21 @@ and date.
   Kasur garlic +82.22% and Sahiwal garlic +84.76% on 2026-11-04 look like data
   jumps, not real market moves, and the app says so instead of hiding it.
 - **Admin panel** (`admin.html`): add daily snapshots, new items and new
-  districts; history, movers and checker update themselves.
-- **All districts, two provinces**: every district of Punjab (41) and Khyber
-  Pakhtunkhwa (38) is listed, grouped by province. Districts with no rates yet
-  show honestly as empty — nothing is estimated or filled in meanwhile.
+  districts; refresh live AMIS data with one button; history, movers and
+  checker update themselves.
+- **All of Pakistan**: 170 districts in 7 groups — Punjab (41), Khyber
+  Pakhtunkhwa (38), Sindh (30), Balochistan (36), Islamabad Capital Territory
+  (1), Gilgit-Baltistan (14), Azad Jammu and Kashmir (10) — plus Karachi's
+  retail list as a separate city. Pick a province first, then only its
+  districts are offered. Districts with no rates yet show honestly as empty
+  — nothing is estimated or filled in meanwhile.
+- **Public live API** (no key, see `api.html`): `/api/live`,
+  `/api/provinces`, `/api/districts?province=…`, `/api/today`, `/api/movers`,
+  `/api/history`, `/api/cheapest`, `/api/check`, `/api/meta`.
+- **Daily refresh**: the admin panel pulls the public AMIS daily-changes
+  page and upserts it as a new dated snapshot (wholesale, source “amis”,
+  at most once every 30 minutes). Unknown AMIS market towns are skipped,
+  never forced into the district list.
 
 ## Data (seeded 2026-11-04, real and sourced)
 - **AMIS Pakistan, Daily Wholesale Price Commodity Change** — wholesale
@@ -42,15 +53,24 @@ change it on deploy).
 ## Run
 ```sh
 node server.js          # http://127.0.0.1:3030
-node test.js            # 28 checks on a fresh DB (all must pass)
+node test.js            # 46 checks on a fresh DB (all must pass)
 ```
 
 ## Honest limits
+- No official government API exists for mandi rates — this API serves the
+  app's own database; it does not claim to be official.
+- The daily refresh reads the public AMIS page and can break if AMIS changes
+  its table layout; manual admin entry remains the fallback. Karachi retail
+  is manual only: its source page mixes Roman-Urdu names with no reliable
+  English mapping, so auto-parsing it was deliberately not built.
 - Retail official rates currently cover Karachi only; Peshawar retail comes
   from a dated press survey, and every other district shows wholesale only
   (or nothing yet) until its rates are added.
 - No district's rates are invented: districts without a snapshot show an
   explicit "no rates recorded yet" message.
+- Balochistan uses the 36-district 2023 list; 2026 splits (Quetta East/West,
+  Wadh, Tump, Barshore, North/South Dera Bugti) are not seeded — add them
+  via the admin district form when their status is confirmed.
 - AMIS direction icons were ignored: direction is computed from the change
   value itself, because the icons on the source page are inconsistent.
-- No SMS/WhatsApp alerts yet — that is a v2 step, not claimed here.
+- No SMS/WhatsApp alerts yet — that is a later step, not claimed here.

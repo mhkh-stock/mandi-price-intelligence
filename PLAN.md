@@ -46,3 +46,41 @@ alert subscriptions. Each v2 step gets its own test before it ships.
 - Copy corrected site-wide: today's note, cheapest note, checker fallback
   note, footer (Peshawar survey named). Rate-less districts show empty
   honestly, never estimated. Tests 26 -> 28, all passing.
+
+## Live status 2026-11-04 ~20:05 PKT (verified by direct check)
+- LIVE now: v1.1 — Punjab 41 + KPK 38 districts, Peshawar retail
+  (2026-11-02, source brecorder-survey), Nowshera honestly empty,
+  districts section, grouped selects. Live container auto-deployed from
+  the GitHub push (commit 6207e5a) — SnapDeploy has NO redeploy button
+  (only Restart, which re-runs the old image).
+- NOT live yet: v1.2 polish (hero province chips, admin district form,
+  corrected copy; commits c608ed57 + 76061927). Blocked on SnapDeploy
+  free tier: 5/5 deploys used in this 12h window, resets ~08:00 PKT
+  2026-11-05. On reset, trigger a deploy (push or dashboard) and verify
+  the homepage contains id="provinceChips".
+
+## v2.0 — All-Pakistan + live API + daily refresh (2026-11-04 evening, on his order)
+- All 170 districts seeded: Punjab 41, KPK 38, Sindh 30, Balochistan 36
+  (2023 list; 2026 splits not seeded, addable via admin), ICT 1,
+  Gilgit-Baltistan 14 (2019 notification), AJK 10. Live DB holds 171
+  locations because Karachi's retail list is a separate city, not a district.
+- Province-first selection everywhere a city is picked (hero, checker,
+  trend, admin snapshot): province select first, district select shows only
+  that province's districts. Default Punjab / Lahore; checker defaults
+  Sindh / Karachi. Old grouped single-select removed.
+- Public no-key JSON API: /api/provinces, /api/districts?province=,
+  /api/live, plus existing /api/meta, /api/today, /api/movers, /api/history,
+  /api/cheapest, /api/check. Docs at public/api.html, linked from footer.
+- Daily refresh POST /api/admin/refresh (master code only, 30-min minimum
+  interval unless force=true): fetches the live AMIS GridView table with
+  node:http, parses it with regex (lib/amis.js), upserts wholesale rows for
+  the current PKT date + yesterday with source 'amis'. Verified live
+  2026-11-04: 528 inserted, 82 updated, 478 skipped (AMIS market towns not
+  in the district list), second call correctly answered too-soon.
+  Crop mapping: exact, then parenthetical variant, then X/Y split, then
+  first-word match; unmatched crops become new kg items (Banana -> dozen).
+- Karachi retail auto-refresh NOT built: its source page uses Roman-Urdu
+  names with no reliable English mapping and no verifiable date — manual
+  admin entry stays, stated in README.
+- Tests 28 -> 46, all passing on a fresh DB, including a parser unit test
+  on a fixture snippet and an unavailable-service detection test.

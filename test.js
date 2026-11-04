@@ -31,7 +31,23 @@ async function waitReady() {
   try {
     check('server starts', await waitReady(), serverLog.slice(-500));
     const meta = await j('/api/meta');
-    check('meta has Lahore + Karachi', meta.cities.includes('Lahore') && meta.cities.includes('Karachi'), meta.cities);
+    const cityNames = meta.cities.map((c) => c.name);
+    check('meta has Lahore + Karachi', cityNames.includes('Lahore') && cityNames.includes('Karachi'), cityNames);
+    const punjab = meta.provinces.find((g) => g.name === 'Punjab');
+    const kpk = meta.provinces.find((g) => g.name === 'Khyber Pakhtunkhwa');
+    check('Punjab has all 41 districts', punjab && punjab.districts.length === 41, punjab && punjab.districts.length);
+    check('KPK has all 38 districts', kpk && kpk.districts.length === 38, kpk && kpk.districts.length);
+    check('Nowshera + Peshawar listed under KPK', kpk && kpk.districts.some((d) => d.name === 'Nowshera') && kpk.districts.some((d) => d.name === 'Peshawar'), kpk && kpk.districts.map((d) => d.name));
+    check('Rahim Yar Khan renamed (no old joined name)', cityNames.includes('Rahim Yar Khan') && !cityNames.includes('RahimYarKhan'), cityNames);
+    const psh = await j('/api/today?city=Peshawar');
+    const pTom = psh.rows.find((r) => r.item === 'Tomato');
+    check('Peshawar tomato retail 100 (Business Recorder 2026-11-02)', psh.date === '2026-11-02' && pTom && pTom.retail_bazaar === 100, psh);
+    const nows = await j('/api/today?city=Nowshera');
+    check('Nowshera honestly empty (no rates invented)', nows.date === null && nows.rows.length === 0, nows);
+    const newCity = await j('/api/admin/city', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: 'mandi-admin', name: 'TestDistrict', province: 'Punjab' }) });
+    check('admin/city creates a district', newCity.ok === true, newCity);
+    const meta2 = await j('/api/meta');
+    check('TestDistrict appears under Punjab', meta2.provinces.find((g) => g.name === 'Punjab').districts.some((d) => d.name === 'TestDistrict'), meta2.provinces.find((g) => g.name === 'Punjab'));
     check('meta has 20+ items', meta.items.length >= 20, meta.items.length);
     check('latest date is 2026-11-04', meta.latest_date === '2026-11-04', meta.latest_date);
     const lahore = await j('/api/today?city=Lahore');

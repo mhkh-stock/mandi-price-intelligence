@@ -42,7 +42,7 @@ change it on deploy).
 ## Run
 ```sh
 node server.js          # http://127.0.0.1:3030
-node test.js            # 26 checks on a fresh DB (all must pass)
+node test.js            # 28 checks on a fresh DB (all must pass)
 ```
 
 ## Honest limits

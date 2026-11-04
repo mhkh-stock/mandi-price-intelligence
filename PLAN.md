@@ -37,3 +37,12 @@ alert subscriptions. Each v2 step gets its own test before it ships.
 - Tests extended 18 -> 26, all passing on a fresh DB.
 - Live update path: redeploy the SnapDeploy container (startup seeding is
   idempotent, so the existing DB gains districts + Peshawar rows on restart).
+
+## v1.2 — Whole-website province pass (2026-11-04 evening, on his order)
+- Hero now states the full coverage (Punjab 41 + KPK 38) and carries
+  Punjab / KPK quick-switch chips; nav gained an All Districts link.
+- City selects everywhere (rates, checker, trend, admin snapshot) are grouped
+  by province; admin gained an "Add new district" form (province select).
+- Copy corrected site-wide: today's note, cheapest note, checker fallback
+  note, footer (Peshawar survey named). Rate-less districts show empty
+  honestly, never estimated. Tests 26 -> 28, all passing.

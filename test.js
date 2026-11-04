@@ -76,8 +76,12 @@ async function waitReady() {
     check('admin snapshot appears in today', tc.rows.some((r) => r.item === 'Onion' && r.wholesale_per_unit === 150), tc.rows);
     const home = await fetch(BASE + '/');
     check('homepage serves 200', home.status === 200, home.status);
+    const homeHtml = await home.text();
+    check('homepage has districts section + province chips', homeHtml.includes('id="allDistricts"') && homeHtml.includes('id="provinceChips"'), homeHtml.length);
     const adminPage = await fetch(BASE + '/admin.html');
     check('admin page serves 200', adminPage.status === 200, adminPage.status);
+    const adminHtml = await adminPage.text();
+    check('admin page has add-district form', adminHtml.includes('Add new district') && adminHtml.includes('id="dProv"'), adminHtml.length);
   } finally {
     child.kill();
   }

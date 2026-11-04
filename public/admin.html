@@ -21,7 +21,8 @@
   <h3>Add daily snapshot</h3>
   <div class="row">
     <label>Date <input id="fDate" type="date"></label>
-    <label>City <select id="fCity"></select></label>
+    <label>Province <select id="fProv"></select></label>
+    <label>District <select id="fCity"></select></label>
     <label>Item <input id="fItem" placeholder="Tomato"></label>
     <label>Variant <input id="fVariant" placeholder="e.g. China (optional)"></label>
     <label>Wholesale (Rs/100kg, or per dozen) <input id="fWholesale" type="number" step="any"></label>
@@ -32,10 +33,16 @@
     <button id="saveBtn">Save snapshot</button>
   </div>
   <div id="saveMsg" class="result" style="display:none"></div>
+  <h3>Refresh live data from AMIS</h3>
+  <p class="note">Pulls today's AMIS daily-changes page and upserts it as a new dated snapshot (wholesale only, source “amis”). Runs at most once every 30 minutes. Karachi retail stays manual — its page format is not reliably parseable.</p>
+  <div class="row">
+    <button id="refreshBtn">Refresh live data now</button>
+  </div>
+  <div id="refreshMsg" class="result" style="display:none"></div>
   <h3>Add new district</h3>
   <div class="row">
     <label>District name <input id="dName" placeholder="e.g. Nowshera"></label>
-    <label>Province <select id="dProv"><option>Punjab</option><option>Khyber Pakhtunkhwa</option><option>Sindh</option><option>Other</option></select></label>
+    <label>Province <select id="dProv"><option>Punjab</option><option>Khyber Pakhtunkhwa</option><option>Sindh</option><option>Balochistan</option><option>Islamabad Capital Territory</option><option>Gilgit-Baltistan</option><option>Azad Jammu and Kashmir</option><option>Other</option></select></label>
     <button id="districtBtn">Add district</button>
   </div>
   <h3>Add new item</h3>

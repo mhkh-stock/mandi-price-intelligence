@@ -20,9 +20,12 @@
 
 <section class="hero">
   <h1>Aaj mandi mein kya bhao hai?</h1>
-  <p>Real wholesale rates from AMIS, official retail from the Commissioner Karachi list, and a dated Peshawar retail survey — across every district of Punjab (41) and Khyber Pakhtunkhwa (38). History, trends and an overcharge checker. No estimates: every rate shows its source and date.</p>
+  <p>Real wholesale rates from AMIS, official retail from the Commissioner Karachi list, and a dated Peshawar retail survey — across all 170 districts of Pakistan. Pick a province first, then its district. History, trends and an overcharge checker. No estimates: every rate shows its source and date.</p>
   <div class="hero-controls">
-    <label>City
+    <label>Province
+      <select id="provSelect"></select>
+    </label>
+    <label>District
       <select id="citySelect"></select>
     </label>
     <span id="dateBadge" class="badge"></span>
@@ -69,7 +72,8 @@
   <h2>Overcharge checker — dukaandar ne zyada liya?</h2>
   <p class="note">Type what you paid. We compare it with the official bazaar rate on file and tell you plainly: fair, slightly above, or overcharged — and by how much. The verdict always names the city and date of the rate used; if your district has no official rate yet, it falls back to the official rate on file from another city and says so.</p>
   <div class="row">
-    <label>City <select id="checkCity"></select></label>
+    <label>Province <select id="provCheck"></select></label>
+    <label>District <select id="checkCity"></select></label>
     <label>Item <select id="checkItem"></select></label>
     <label>Price you paid (Rs / kg) <input id="checkPrice" type="number" min="0" step="0.5" placeholder="e.g. 220"></label>
     <button id="checkBtn">Check</button>
@@ -80,7 +84,8 @@
 <section class="section">
   <h2>Price trend</h2>
   <div class="row">
-    <label>City <select id="trendCity"></select></label>
+    <label>Province <select id="provTrend"></select></label>
+    <label>District <select id="trendCity"></select></label>
     <label>Item <select id="trendItem"></select></label>
     <button id="trendBtn">Show trend</button>
   </div>
@@ -89,14 +94,15 @@
 </section>
 
 <section class="section" id="allDistricts">
-  <h2>All districts — Punjab &amp; Khyber Pakhtunkhwa</h2>
-  <p class="note">Every district of both provinces is listed. Districts marked “soon” have no rates yet — they show honestly as empty until a daily snapshot is added. Tap any district to view it.</p>
+  <h2>All districts — Pakistan</h2>
+  <p class="note">Every district of every province and territory is listed — 170 districts in total, plus Karachi's retail list. Districts marked “soon” have no rates yet — they show honestly as empty until a daily snapshot is added. Tap any district to view it.</p>
   <div id="districts"></div>
 </section>
 
 <footer>
   <p><strong>Sources:</strong> <span id="sources"></span></p>
   <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes. Retail: Commissioner Karachi official list, plus the Business Recorder Peshawar survey (2 Nov 2026). If a rate looks wrong, the source and date above let you verify it.</p>
+  <p><a href="api.html">Public live API</a> — every rate on this site is also available as free JSON, no key needed.</p>
 </footer>
 
 <script src="app.js"></script>

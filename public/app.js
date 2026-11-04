@@ -5,25 +5,48 @@ const fmt = (n) => n === null || n === undefined ? '—' : 'Rs ' + Number(n).toL
 const pct = (n) => n === null || n === undefined ? '—' : (n > 0 ? '▲ +' : n < 0 ? '▼ ' : '') + n.toFixed(2) + '%';
 
 let meta = null;
+// Province-first selection: a province select drives a district select that
+// shows ONLY that province's districts. Returns the two elements.
+function fillProvinces(sel) {
+  sel.innerHTML = meta.provinces.map((g) => `<option>${esc(g.name)}</option>`).join('');
+}
+function fillDistricts(provSel, distSel) {
+  const g = meta.provinces.find((x) => x.name === provSel.value);
+  distSel.innerHTML = (g ? g.districts : []).map((d) => `<option>${esc(d.name)}</option>`).join('');
+}
+function bindPair(provId, distId, onChange) {
+  const p = $(provId), d = $(distId);
+  fillProvinces(p);
+  if ([...p.options].some((o) => o.value === 'Punjab')) p.value = 'Punjab';
+  fillDistricts(p, d);
+  p.addEventListener('change', () => { fillDistricts(p, d); if (onChange) onChange(); });
+  d.addEventListener('change', () => { if (onChange) onChange(); });
+  return { p, d };
+}
+function setPair(provId, distId, province, district) {
+  const p = $(provId), d = $(distId);
+  if ([...p.options].some((o) => o.value === province)) p.value = province;
+  fillDistricts(p, d);
+  if ([...d.options].some((o) => o.value === district)) d.value = district;
+}
 async function loadMeta() {
   meta = await (await fetch('/api/meta')).json();
-  const grouped = meta.provinces.map((g) => `<optgroup label="${esc(g.name)}">${g.districts.map((d) => `<option>${esc(d.name)}</option>`).join('')}</optgroup>`).join('');
-  for (const sel of [$('citySelect'), $('checkCity'), $('trendCity')]) sel.innerHTML = grouped;
-  const names = meta.cities.map((c) => c.name);
-  $('citySelect').value = names.includes('Lahore') ? 'Lahore' : names[0];
-  $('checkCity').value = names.includes('Karachi') ? 'Karachi' : names[0];
-  $('trendCity').value = $('citySelect').value;
+  bindPair('provSelect', 'citySelect', loadToday);
+  bindPair('provCheck', 'checkCity', null);
+  bindPair('provTrend', 'trendCity', null);
+  setPair('provCheck', 'checkCity', 'Sindh', 'Karachi');
+  setPair('provTrend', 'trendCity', 'Punjab', 'Lahore');
   for (const sel of [$('cheapItem'), $('checkItem'), $('trendItem')]) {
     sel.innerHTML = meta.items.map((i) => `<option value="${esc(i.en)}">${esc(i.en)} (${esc(i.ur)})</option>`).join('');
   }
   $('sources').innerHTML = meta.sources.map((s) => `${esc(s.name)} — ${esc(s.note)}`).join(' · ');
   $('districts').innerHTML = meta.provinces.map((g) => {
     const withRates = g.districts.filter((d) => d.has_rates).length;
-    return `<h3>${esc(g.name)} — ${g.districts.length} districts (${withRates} with rates so far)</h3><p class="district-list">${g.districts.map((d) => `<a href="#" data-city="${esc(d.name)}" class="${d.has_rates ? 'has-rates' : 'no-rates'}">${esc(d.name)}${d.has_rates ? '' : ' · soon'}</a>`).join(' ')}</p>`;
+    return `<h3>${esc(g.name)} — ${g.districts.length} districts (${withRates} with rates so far)</h3><p class="district-list">${g.districts.map((d) => `<a href="#" data-city="${esc(d.name)}" data-prov="${esc(g.name)}" class="${d.has_rates ? 'has-rates' : 'no-rates'}">${esc(d.name)}${d.has_rates ? '' : ' · soon'}</a>`).join(' ')}</p>`;
   }).join('');
   document.querySelectorAll('#districts a[data-city]').forEach((a) => a.addEventListener('click', (e) => {
     e.preventDefault();
-    $('citySelect').value = a.dataset.city;
+    setPair('provSelect', 'citySelect', a.dataset.prov, a.dataset.city);
     loadToday();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }));
@@ -31,7 +54,7 @@ async function loadMeta() {
   document.querySelectorAll('#provinceChips button[data-prov]').forEach((b) => b.addEventListener('click', () => {
     const g = meta.provinces.find((x) => x.name === b.dataset.prov);
     const pick = g.districts.find((d) => d.has_rates) || g.districts[0];
-    if (pick) { $('citySelect').value = pick.name; loadToday(); document.getElementById('today').scrollIntoView({ behavior: 'smooth' }); }
+    if (pick) { setPair('provSelect', 'citySelect', g.name, pick.name); loadToday(); document.getElementById('today').scrollIntoView({ behavior: 'smooth' }); }
   }));
 }
 async function loadToday() {
@@ -98,7 +121,6 @@ async function loadTrend() {
   const data = await (await fetch('/api/history?item=' + encodeURIComponent($('trendItem').value) + '&city=' + encodeURIComponent($('trendCity').value))).json();
   drawChart(data.points);
 }
-$('citySelect').addEventListener('change', loadToday);
 $('cheapBtn').addEventListener('click', loadCheapest);
 $('checkBtn').addEventListener('click', runCheck);
 $('trendBtn').addEventListener('click', loadTrend);

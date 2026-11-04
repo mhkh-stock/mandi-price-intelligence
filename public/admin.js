@@ -2,12 +2,20 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 $('fDate').value = new Date().toISOString().slice(0, 10);
+let adminMeta = null;
+function fillAdminDistricts() {
+  const g = adminMeta.provinces.find((x) => x.name === $('fProv').value);
+  $('fCity').innerHTML = (g ? g.districts : []).map((d) => `<option>${esc(d.name)}</option>`).join('');
+}
 async function loadCities() {
   try {
-    const meta = await (await fetch('/api/meta')).json();
-    $('fCity').innerHTML = meta.provinces.map((g) => `<optgroup label="${esc(g.name)}">${g.districts.map((d) => `<option>${esc(d.name)}</option>`).join('')}</optgroup>`).join('');
-  } catch { /* city select stays empty until meta loads */ }
+    adminMeta = await (await fetch('/api/meta')).json();
+    $('fProv').innerHTML = adminMeta.provinces.map((g) => `<option>${esc(g.name)}</option>`).join('');
+    if ([...$('fProv').options].some((o) => o.value === 'Punjab')) $('fProv').value = 'Punjab';
+    fillAdminDistricts();
+  } catch { /* selects stay empty until meta loads */ }
 }
+$('fProv').addEventListener('change', fillAdminDistricts);
 loadCities();
 async function loadRecent() {
   const code = $('code').value;
@@ -38,4 +46,14 @@ $('districtBtn').addEventListener('click', async () => {
   const m = $('saveMsg'); m.style.display = 'block';
   m.textContent = data.ok ? 'District added.' : ('Error: ' + (data.error || 'unknown'));
   if (data.ok) loadCities();
+});
+$('refreshBtn').addEventListener('click', async () => {
+  const m = $('refreshMsg'); m.style.display = 'block';
+  m.textContent = 'Refreshing from AMIS — please wait…';
+  const data = await (await fetch('/api/admin/refresh', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: $('code').value }) })).json();
+  if (data.ok) {
+    m.textContent = `Refreshed for ${data.date}: ${data.inserted} new rows, ${data.updated} updated, ${data.skipped} skipped (unknown markets).` + (data.unmatched_crops.length ? ` New items added: ${data.unmatched_crops.join(', ')}.` : '');
+  } else {
+    m.textContent = 'Refresh did not run: ' + (data.reason || data.error || 'unknown') + (data.retry_after_seconds ? ` — try again in ${Math.ceil(data.retry_after_seconds / 60)} min.` : '');
+  }
 });

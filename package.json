@@ -1,0 +1,1 @@
+{"description":"Mandi Price Intelligence — daily wholesale + official retail rates for Pakistan, with history, trends, spike alerts and an overcharge checker.","engines":{"node":">=24"},"main":"server.js","name":"mandi-price-intelligence","scripts":{"start":"node server.js","test":"node test.js"},"version":"1.0.0"}

@@ -45,8 +45,13 @@ CREATE TABLE IF NOT EXISTS snapshots (
 );
 `);
 
-function cityId(name) {
-  db.prepare('INSERT OR IGNORE INTO cities(name) VALUES(?)').run(name);
+// ---- migrations for databases created before provinces existed ----
+try { db.exec('ALTER TABLE cities ADD COLUMN province TEXT DEFAULT \'\''); } catch { /* already there */ }
+db.prepare('UPDATE cities SET name=? WHERE name=?').run('Rahim Yar Khan', 'RahimYarKhan');
+
+function cityId(name, province) {
+  db.prepare('INSERT OR IGNORE INTO cities(name, province) VALUES(?,?)').run(name, province || '');
+  if (province) db.prepare('UPDATE cities SET province=? WHERE name=?').run(province, name);
   return db.prepare('SELECT id FROM cities WHERE name=?').get(name).id;
 }
 function itemId(en, ur, unit) {
@@ -79,6 +84,22 @@ if (seedCount === 0) {
   const SOURCES = seed.sources;
   db.prepare('CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT)').run();
   db.prepare('INSERT OR REPLACE INTO meta(k, v) VALUES(?, ?)').run('sources', JSON.stringify(SOURCES));
+}
+
+// ---- idempotent: provinces + every district + Peshawar retail (runs every start,
+// so databases seeded before this expansion gain the new districts too) ----
+{
+  const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed-data.json'), 'utf8'));
+  for (const [prov, list] of Object.entries(seed.provinces || {})) {
+    for (const d of list) cityId(d, prov);
+  }
+  cityId('Karachi', 'Sindh');
+  const psh = cityId('Peshawar', 'Khyber Pakhtunkhwa');
+  const upP = db.prepare(`INSERT OR IGNORE INTO snapshots
+    (city_id, item_id, variant, date, retail_bazaar, source) VALUES(?,?,?,?,?, 'brecorder-survey')`);
+  for (const r of seed.retail_peshawar_2026_11_02 || []) {
+    upP.run(psh, itemId(r.item, '', 'kg'), r.variant || '', '2026-11-02', r.bazaar);
+  }
 }
 
 function latestDate(cityName) {
@@ -184,9 +205,18 @@ const server = http.createServer(async (req, res) => {
     const p = url.pathname;
     if (p === '/api/meta' && req.method === 'GET') {
       const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed-data.json'), 'utf8'));
-      const cities = db.prepare('SELECT name FROM cities ORDER BY name').all().map((r) => r.name);
+      const cities = db.prepare(`SELECT c.name name, c.province province,
+        EXISTS(SELECT 1 FROM snapshots s WHERE s.city_id = c.id) has_rates
+        FROM cities c ORDER BY c.province, c.name`).all();
+      const provinces = [];
+      for (const c of cities) {
+        const prov = c.province || 'Other';
+        let g = provinces.find((x) => x.name === prov);
+        if (!g) { g = { name: prov, districts: [] }; provinces.push(g); }
+        g.districts.push({ name: c.name, has_rates: !!c.has_rates });
+      }
       const items = db.prepare('SELECT name_en en, name_ur ur, unit FROM items ORDER BY name_en').all();
-      return sendJson(res, 200, { cities, items, latest_date: latestDate(null), sources: seed.sources, flag_threshold: FLAG_THRESHOLD });
+      return sendJson(res, 200, { cities, provinces, items, latest_date: latestDate(null), sources: seed.sources, flag_threshold: FLAG_THRESHOLD });
     }
     if (p === '/api/today' && req.method === 'GET') {
       const city = url.searchParams.get('city') || 'Lahore';
@@ -256,6 +286,13 @@ const server = http.createServer(async (req, res) => {
           body.retail_mandi === undefined ? null : Number(body.retail_mandi),
           body.retail_auction === undefined ? null : Number(body.retail_auction),
           body.source || 'admin-entry');
+      return sendJson(res, 200, { ok: true });
+    }
+    if (p === '/api/admin/city' && req.method === 'POST') {
+      const body = await readBody(req);
+      if (!body || body.code !== ADMIN_CODE) return sendJson(res, 403, { error: 'bad admin code' });
+      if (!body.name) return sendJson(res, 400, { error: 'name required' });
+      cityId(body.name, body.province || '');
       return sendJson(res, 200, { ok: true });
     }
     if (p === '/api/admin/item' && req.method === 'POST') {

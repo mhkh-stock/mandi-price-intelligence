@@ -7,23 +7,35 @@ const pct = (n) => n === null || n === undefined ? '—' : (n > 0 ? '▲ +' : n 
 let meta = null;
 async function loadMeta() {
   meta = await (await fetch('/api/meta')).json();
-  for (const sel of [$('citySelect'), $('checkCity'), $('trendCity')]) {
-    sel.innerHTML = meta.cities.map((c) => `<option>${esc(c)}</option>`).join('');
-  }
-  $('citySelect').value = meta.cities.includes('Lahore') ? 'Lahore' : meta.cities[0];
-  $('checkCity').value = meta.cities.includes('Karachi') ? 'Karachi' : meta.cities[0];
+  const grouped = meta.provinces.map((g) => `<optgroup label="${esc(g.name)}">${g.districts.map((d) => `<option>${esc(d.name)}</option>`).join('')}</optgroup>`).join('');
+  for (const sel of [$('citySelect'), $('checkCity'), $('trendCity')]) sel.innerHTML = grouped;
+  const names = meta.cities.map((c) => c.name);
+  $('citySelect').value = names.includes('Lahore') ? 'Lahore' : names[0];
+  $('checkCity').value = names.includes('Karachi') ? 'Karachi' : names[0];
   $('trendCity').value = $('citySelect').value;
   for (const sel of [$('cheapItem'), $('checkItem'), $('trendItem')]) {
     sel.innerHTML = meta.items.map((i) => `<option value="${esc(i.en)}">${esc(i.en)} (${esc(i.ur)})</option>`).join('');
   }
   $('sources').innerHTML = meta.sources.map((s) => `${esc(s.name)} — ${esc(s.note)}`).join(' · ');
+  $('districts').innerHTML = meta.provinces.map((g) => {
+    const withRates = g.districts.filter((d) => d.has_rates).length;
+    return `<h3>${esc(g.name)} — ${g.districts.length} districts (${withRates} with rates so far)</h3><p class="district-list">${g.districts.map((d) => `<a href="#" data-city="${esc(d.name)}" class="${d.has_rates ? 'has-rates' : 'no-rates'}">${esc(d.name)}${d.has_rates ? '' : ' · soon'}</a>`).join(' ')}</p>`;
+  }).join('');
+  document.querySelectorAll('#districts a[data-city]').forEach((a) => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    $('citySelect').value = a.dataset.city;
+    loadToday();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
 }
 async function loadToday() {
   const city = $('citySelect').value;
   const data = await (await fetch('/api/today?city=' + encodeURIComponent(city))).json();
   $('todayCity').textContent = city;
-  $('dateBadge').textContent = 'Rates as of ' + (data.date || '—');
-  $('ratesBody').innerHTML = data.rows.map((r) => `<tr><td><strong>${esc(r.item)}</strong> ${esc(r.ur)}${r.variant ? ' (' + esc(r.variant) + ')' : ''}</td><td>${r.wholesale_per_unit === null ? '—' : fmt(r.wholesale_per_unit) + ' / ' + esc(r.unit)}</td><td>${r.retail_bazaar === null ? '—' : fmt(r.retail_bazaar) + ' / kg'}</td><td class="${r.change_pct > 0 ? 'up' : r.change_pct < 0 ? 'down' : ''}">${pct(r.change_pct)}</td><td>${r.flag ? '<span class="flag">⚠️ verify — unusual jump</span>' : ''}</td></tr>`).join('');
+  $('dateBadge').textContent = data.date ? 'Rates as of ' + data.date : 'No rates recorded yet for this district';
+  $('ratesBody').innerHTML = data.rows.length
+    ? data.rows.map((r) => `<tr><td><strong>${esc(r.item)}</strong> ${esc(r.ur)}${r.variant ? ' (' + esc(r.variant) + ')' : ''}</td><td>${r.wholesale_per_unit === null ? '—' : fmt(r.wholesale_per_unit) + ' / ' + esc(r.unit)}</td><td>${r.retail_bazaar === null ? '—' : fmt(r.retail_bazaar) + ' / kg'}</td><td class="${r.change_pct > 0 ? 'up' : r.change_pct < 0 ? 'down' : ''}">${pct(r.change_pct)}</td><td>${r.flag ? '<span class="flag">⚠️ verify — unusual jump</span>' : ''}</td></tr>`).join('')
+    : `<tr><td colspan="5">No rates recorded yet for ${esc(city)}. Districts appear here with their daily snapshot as soon as it is added — nothing is estimated or filled in meanwhile.</td></tr>`;
   const mv = await (await fetch('/api/movers?city=' + encodeURIComponent(city) + '&limit=5')).json();
   $('risers').innerHTML = mv.rises.map((r) => `<li>${esc(r.item)}: <span class="up">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';
   $('fallers').innerHTML = mv.falls.map((r) => `<li>${esc(r.item)}: <span class="down">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';

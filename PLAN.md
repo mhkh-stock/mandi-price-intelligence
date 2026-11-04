@@ -26,3 +26,14 @@ RahimYarKhan. Items: 27 with Urdu names.
 Daily ingestion run (fetch AMIS + commissioner list, append snapshot, keep
 source + date); more cities; official retail lists for Lahore/Islamabad;
 alert subscriptions. Each v2 step gets its own test before it ships.
+
+## v1.1 — Provinces expansion (2026-11-04 evening, on his order)
+- All 41 Punjab districts + all 38 KPK districts listed, grouped by province
+  (cities table gained a `province` column; old DBs migrate on startup,
+  including the "RahimYarKhan" -> "Rahim Yar Khan" rename).
+- Peshawar retail seeded from the dated Business Recorder survey (2026-11-02);
+  Nowshera and all other rate-less districts show honestly empty.
+- New admin endpoint POST /api/admin/city (code-gated) creates bare districts.
+- Tests extended 18 -> 26, all passing on a fresh DB.
+- Live update path: redeploy the SnapDeploy container (startup seeding is
+  idempotent, so the existing DB gains districts + Peshawar rows on restart).

@@ -13,19 +13,21 @@
     <a href="#today">Today's Rates</a>
     <a href="#movers">Movers</a>
     <a href="#checker">Overcharge Checker</a>
+    <a href="#allDistricts">All Districts</a>
     <a href="admin.html">Admin</a>
   </nav>
 </header>
 
 <section class="hero">
   <h1>Aaj mandi mein kya bhao hai?</h1>
-  <p>Real wholesale rates from AMIS and official retail rates from the Commissioner Karachi list — with history, trends and an overcharge checker. No estimates, every rate shows its source and date.</p>
+  <p>Real wholesale rates from AMIS, official retail from the Commissioner Karachi list, and a dated Peshawar retail survey — across every district of Punjab (41) and Khyber Pakhtunkhwa (38). History, trends and an overcharge checker. No estimates: every rate shows its source and date.</p>
   <div class="hero-controls">
     <label>City
       <select id="citySelect"></select>
     </label>
     <span id="dateBadge" class="badge"></span>
   </div>
+  <div class="hero-controls" id="provinceChips"></div>
 </section>
 
 <section id="movers" class="section">
@@ -44,7 +46,7 @@
 
 <section id="today" class="section">
   <h2>Today's rates — <span id="todayCity"></span></h2>
-  <p class="note">Wholesale is shown per kg (per dozen for banana, as published by AMIS). Official retail appears where an official list exists — currently Karachi. A ⚠️ flag means the day's jump is 40% or more: unusual, verify before acting on it.</p>
+  <p class="note">Wholesale is shown per kg (per dozen for banana, as published by AMIS). Official retail appears where an official list exists — Karachi — and Peshawar shows its dated press survey; other districts show wholesale only, or nothing yet until a snapshot is added. A ⚠️ flag means the day's jump is 40% or more: unusual, verify before acting on it.</p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Item</th><th>Wholesale / unit</th><th>Official retail (bazaar)</th><th>Change vs yesterday</th><th>Note</th></tr></thead>
@@ -55,6 +57,7 @@
 
 <section class="section">
   <h2>Cheapest city today</h2>
+  <p class="note">Compared across districts that have a wholesale rate for the item today — districts with no rate yet are simply not in the comparison.</p>
   <div class="row">
     <label>Item <select id="cheapItem"></select></label>
     <button id="cheapBtn">Compare cities</button>
@@ -64,7 +67,7 @@
 
 <section id="checker" class="section">
   <h2>Overcharge checker — dukaandar ne zyada liya?</h2>
-  <p class="note">Type what you paid. We compare it with the official bazaar rate on file and tell you plainly: fair, slightly above, or overcharged — and by how much.</p>
+  <p class="note">Type what you paid. We compare it with the official bazaar rate on file and tell you plainly: fair, slightly above, or overcharged — and by how much. The verdict always names the city and date of the rate used; if your district has no official rate yet, it falls back to the official rate on file from another city and says so.</p>
   <div class="row">
     <label>City <select id="checkCity"></select></label>
     <label>Item <select id="checkItem"></select></label>
@@ -85,7 +88,7 @@
   <p class="note">History starts with the two days seeded at launch (3–4 Nov 2026) and grows with every daily snapshot added. Two points make a line, not a forecast — the trend gets stronger every day data is added.</p>
 </section>
 
-<section class="section">
+<section class="section" id="allDistricts">
   <h2>All districts — Punjab &amp; Khyber Pakhtunkhwa</h2>
   <p class="note">Every district of both provinces is listed. Districts marked “soon” have no rates yet — they show honestly as empty until a daily snapshot is added. Tap any district to view it.</p>
   <div id="districts"></div>
@@ -93,7 +96,7 @@
 
 <footer>
   <p><strong>Sources:</strong> <span id="sources"></span></p>
-  <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes. Retail: Commissioner Karachi official list. If a rate looks wrong, the source and date above let you verify it.</p>
+  <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes. Retail: Commissioner Karachi official list, plus the Business Recorder Peshawar survey (2 Nov 2026). If a rate looks wrong, the source and date above let you verify it.</p>
 </footer>
 
 <script src="app.js"></script>

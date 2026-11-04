@@ -21,17 +21,23 @@
   <h3>Add daily snapshot</h3>
   <div class="row">
     <label>Date <input id="fDate" type="date"></label>
-    <label>City <input id="fCity" placeholder="Lahore"></label>
+    <label>City <select id="fCity"></select></label>
     <label>Item <input id="fItem" placeholder="Tomato"></label>
     <label>Variant <input id="fVariant" placeholder="e.g. China (optional)"></label>
     <label>Wholesale (Rs/100kg, or per dozen) <input id="fWholesale" type="number" step="any"></label>
     <label>Retail bazaar (Rs/kg) <input id="fRb" type="number" step="any"></label>
     <label>Retail mandi (Rs/kg) <input id="fRm" type="number" step="any"></label>
     <label>Retail auction (Rs/kg) <input id="fRa" type="number" step="any"></label>
-    <label>Source <input id="fSource" placeholder="amis / commissioner-karachi"></label>
+    <label>Source <input id="fSource" placeholder="amis / commissioner-karachi / brecorder-survey"></label>
     <button id="saveBtn">Save snapshot</button>
   </div>
   <div id="saveMsg" class="result" style="display:none"></div>
+  <h3>Add new district</h3>
+  <div class="row">
+    <label>District name <input id="dName" placeholder="e.g. Nowshera"></label>
+    <label>Province <select id="dProv"><option>Punjab</option><option>Khyber Pakhtunkhwa</option><option>Sindh</option><option>Other</option></select></label>
+    <button id="districtBtn">Add district</button>
+  </div>
   <h3>Add new item</h3>
   <div class="row">
     <label>English name <input id="iEn" placeholder="Tomato"></label>

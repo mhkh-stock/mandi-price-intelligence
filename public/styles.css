@@ -38,3 +38,5 @@ footer { max-width: 1060px; margin: 0 auto; padding: 10px 22px 40px; color: #6b7
 .district-list a { display: inline-block; margin: 2px 6px 2px 0; padding: 2px 8px; border-radius: 12px; background: #f1f5f9; color: #0f172a; text-decoration: none; font-size: 14px; }
 .district-list a.has-rates { background: #dcfce7; }
 .district-list a.no-rates { color: #64748b; }
+.prov-chip { margin: 4px 6px 0 0; padding: 6px 14px; border: 0; border-radius: 20px; background: #14532d; color: #fff; font-size: 14px; cursor: pointer; }
+.prov-chip:hover { background: #15803d; }

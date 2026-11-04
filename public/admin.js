@@ -2,6 +2,13 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 $('fDate').value = new Date().toISOString().slice(0, 10);
+async function loadCities() {
+  try {
+    const meta = await (await fetch('/api/meta')).json();
+    $('fCity').innerHTML = meta.provinces.map((g) => `<optgroup label="${esc(g.name)}">${g.districts.map((d) => `<option>${esc(d.name)}</option>`).join('')}</optgroup>`).join('');
+  } catch { /* city select stays empty until meta loads */ }
+}
+loadCities();
 async function loadRecent() {
   const code = $('code').value;
   const data = await (await fetch('/api/admin/recent?code=' + encodeURIComponent(code))).json();
@@ -24,4 +31,11 @@ $('itemBtn').addEventListener('click', async () => {
   const data = await (await fetch('/api/admin/item', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
   const m = $('saveMsg'); m.style.display = 'block';
   m.textContent = data.ok ? 'Item added.' : ('Error: ' + (data.error || 'unknown'));
+});
+$('districtBtn').addEventListener('click', async () => {
+  const body = { code: $('code').value, name: $('dName').value.trim(), province: $('dProv').value };
+  const data = await (await fetch('/api/admin/city', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
+  const m = $('saveMsg'); m.style.display = 'block';
+  m.textContent = data.ok ? 'District added.' : ('Error: ' + (data.error || 'unknown'));
+  if (data.ok) loadCities();
 });

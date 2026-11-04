@@ -27,6 +27,12 @@ async function loadMeta() {
     loadToday();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }));
+  $('provinceChips').innerHTML = meta.provinces.map((g) => `<button class="prov-chip" data-prov="${esc(g.name)}">${esc(g.name)} (${g.districts.length})</button>`).join('');
+  document.querySelectorAll('#provinceChips button[data-prov]').forEach((b) => b.addEventListener('click', () => {
+    const g = meta.provinces.find((x) => x.name === b.dataset.prov);
+    const pick = g.districts.find((d) => d.has_rates) || g.districts[0];
+    if (pick) { $('citySelect').value = pick.name; loadToday(); document.getElementById('today').scrollIntoView({ behavior: 'smooth' }); }
+  }));
 }
 async function loadToday() {
   const city = $('citySelect').value;

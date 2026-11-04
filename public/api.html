@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Public Live API — Mandi Price Intelligence</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">🥬 Mandi Price Intelligence — Public API</div>
+  <nav><a href="index.html">← Back to rates</a></nav>
+</header>
+<section class="section">
+  <h2>Public live API</h2>
+  <p class="note">Free JSON, no key needed, no sign-up. Every rate carries its source and date — nothing is estimated. This API serves this app's own database; there is no official government API for mandi rates, and this does not claim to be one.</p>
+  <table>
+    <thead><tr><th>Endpoint</th><th>What it returns</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/live</code></td><td>Latest snapshot date, province/district counts, districts with rates</td><td><a href="/api/live">/api/live</a></td></tr>
+      <tr><td><code>GET /api/provinces</code></td><td>All province/territory groups with district counts</td><td><a href="/api/provinces">/api/provinces</a></td></tr>
+      <tr><td><code>GET /api/districts?province=…</code></td><td>Districts of one province, each with a has_rates flag</td><td><a href="/api/districts?province=Punjab">/api/districts?province=Punjab</a></td></tr>
+      <tr><td><code>GET /api/meta</code></td><td>Cities, provinces, items, latest date, sources</td><td><a href="/api/meta">/api/meta</a></td></tr>
+      <tr><td><code>GET /api/today?city=…</code></td><td>Latest rates for one district, with day changes and verify flags</td><td><a href="/api/today?city=Lahore">/api/today?city=Lahore</a></td></tr>
+      <tr><td><code>GET /api/movers?city=…&amp;limit=5</code></td><td>Top risers and fallers for one district</td><td><a href="/api/movers?city=Lahore">/api/movers?city=Lahore</a></td></tr>
+      <tr><td><code>GET /api/history?item=…&amp;city=…</code></td><td>Price history points for one item in one district</td><td><a href="/api/history?item=Tomato&city=Lahore">/api/history?item=Tomato&amp;city=Lahore</a></td></tr>
+      <tr><td><code>GET /api/cheapest?item=…</code></td><td>Districts ranked by wholesale price for one item</td><td><a href="/api/cheapest?item=Tomato">/api/cheapest?item=Tomato</a></td></tr>
+      <tr><td><code>POST /api/check</code></td><td>Overcharge verdict: body <code>{"city","item","price_paid"}</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Daily refresh: the admin panel pulls the public AMIS daily-changes page each day (wholesale only) and upserts it as a new dated snapshot. Districts with no snapshot yet return empty rows, honestly — never estimated. Karachi retail is entered manually because its source page is not reliably parseable.</p>
+</section>
+</body>
+</html>

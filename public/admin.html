@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin — Mandi Price Intelligence</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">🥬 Mandi Price Intelligence — Admin</div>
+  <nav><a href="index.html">← Back to rates</a></nav>
+</header>
+<section class="section">
+  <h2>Admin</h2>
+  <p class="note">Add each day's snapshot and the history, movers and checker update themselves. The admin code is a demo-grade shared code — set ADMIN_CODE on deploy.</p>
+  <div class="row">
+    <label>Admin code <input id="code" type="password" placeholder="mandi-admin"></label>
+    <button id="loadBtn">Load recent snapshots</button>
+  </div>
+  <h3>Add daily snapshot</h3>
+  <div class="row">
+    <label>Date <input id="fDate" type="date"></label>
+    <label>City <input id="fCity" placeholder="Lahore"></label>
+    <label>Item <input id="fItem" placeholder="Tomato"></label>
+    <label>Variant <input id="fVariant" placeholder="e.g. China (optional)"></label>
+    <label>Wholesale (Rs/100kg, or per dozen) <input id="fWholesale" type="number" step="any"></label>
+    <label>Retail bazaar (Rs/kg) <input id="fRb" type="number" step="any"></label>
+    <label>Retail mandi (Rs/kg) <input id="fRm" type="number" step="any"></label>
+    <label>Retail auction (Rs/kg) <input id="fRa" type="number" step="any"></label>
+    <label>Source <input id="fSource" placeholder="amis / commissioner-karachi"></label>
+    <button id="saveBtn">Save snapshot</button>
+  </div>
+  <div id="saveMsg" class="result" style="display:none"></div>
+  <h3>Add new item</h3>
+  <div class="row">
+    <label>English name <input id="iEn" placeholder="Tomato"></label>
+    <label>Urdu name <input id="iUr" placeholder="ٹماٹر"></label>
+    <label>Unit <select id="iUnit"><option>kg</option><option>dozen</option></select></label>
+    <button id="itemBtn">Add item</button>
+  </div>
+  <h3>Recent snapshots</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>City</th><th>Item</th><th>Wholesale</th><th>Retail bazaar</th><th>Source</th></tr></thead>
+    <tbody id="recentBody"></tbody>
+  </table></div>
+</section>
+<script src="admin.js"></script>
+</body>
+</html>

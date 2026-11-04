@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mandi Price Intelligence — Daily Sabzi & Fruit Rates Pakistan</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">🥬 Mandi Price Intelligence <span class="urdu">منڈی ریٹ</span></div>
+  <nav>
+    <a href="#today">Today's Rates</a>
+    <a href="#movers">Movers</a>
+    <a href="#checker">Overcharge Checker</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Aaj mandi mein kya bhao hai?</h1>
+  <p>Real wholesale rates from AMIS and official retail rates from the Commissioner Karachi list — with history, trends and an overcharge checker. No estimates, every rate shows its source and date.</p>
+  <div class="hero-controls">
+    <label>City
+      <select id="citySelect"></select>
+    </label>
+    <span id="dateBadge" class="badge"></span>
+  </div>
+</section>
+
+<section id="movers" class="section">
+  <h2>Today's biggest movers</h2>
+  <div class="movers-grid">
+    <div class="card">
+      <h3>▲ Mehnga hua (risers)</h3>
+      <ul id="risers"></ul>
+    </div>
+    <div class="card">
+      <h3>▼ Sasta hua (fallers)</h3>
+      <ul id="fallers"></ul>
+    </div>
+  </div>
+</section>
+
+<section id="today" class="section">
+  <h2>Today's rates — <span id="todayCity"></span></h2>
+  <p class="note">Wholesale is shown per kg (per dozen for banana, as published by AMIS). Official retail appears where an official list exists — currently Karachi. A ⚠️ flag means the day's jump is 40% or more: unusual, verify before acting on it.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Item</th><th>Wholesale / unit</th><th>Official retail (bazaar)</th><th>Change vs yesterday</th><th>Note</th></tr></thead>
+      <tbody id="ratesBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Cheapest city today</h2>
+  <div class="row">
+    <label>Item <select id="cheapItem"></select></label>
+    <button id="cheapBtn">Compare cities</button>
+  </div>
+  <ul id="cheapList"></ul>
+</section>
+
+<section id="checker" class="section">
+  <h2>Overcharge checker — dukaandar ne zyada liya?</h2>
+  <p class="note">Type what you paid. We compare it with the official bazaar rate on file and tell you plainly: fair, slightly above, or overcharged — and by how much.</p>
+  <div class="row">
+    <label>City <select id="checkCity"></select></label>
+    <label>Item <select id="checkItem"></select></label>
+    <label>Price you paid (Rs / kg) <input id="checkPrice" type="number" min="0" step="0.5" placeholder="e.g. 220"></label>
+    <button id="checkBtn">Check</button>
+  </div>
+  <div id="checkResult" class="result"></div>
+</section>
+
+<section class="section">
+  <h2>Price trend</h2>
+  <div class="row">
+    <label>City <select id="trendCity"></select></label>
+    <label>Item <select id="trendItem"></select></label>
+    <button id="trendBtn">Show trend</button>
+  </div>
+  <canvas id="trendChart" width="900" height="320"></canvas>
+  <p class="note">History starts with the two days seeded at launch (3–4 Nov 2026) and grows with every daily snapshot added. Two points make a line, not a forecast — the trend gets stronger every day data is added.</p>
+</section>
+
+<footer>
+  <p><strong>Sources:</strong> <span id="sources"></span></p>
+  <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes. Retail: Commissioner Karachi official list. If a rate looks wrong, the source and date above let you verify it.</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

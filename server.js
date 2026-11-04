@@ -5,11 +5,14 @@
 // Karachi official retail list. Every rate carries its source and date; nothing is
 // estimated. Admin gate is a simple shared code (env ADMIN_CODE, default
 // 'mandi-admin') — demo-grade, documented in README; change it on deploy.
+// v2: all 170 districts of Pakistan (7 province/territory groups), province-first
+// selection, a public no-key JSON API, and a daily AMIS refresh endpoint.
 'use strict';
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
+const { parseAmisHtml, mapCrop } = require('./lib/amis');
 
 const PORT = Number(process.env.PORT || 3030);
 const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'data', 'mandi.sqlite');
@@ -47,6 +50,7 @@ CREATE TABLE IF NOT EXISTS snapshots (
 
 // ---- migrations for databases created before provinces existed ----
 try { db.exec('ALTER TABLE cities ADD COLUMN province TEXT DEFAULT \'\''); } catch { /* already there */ }
+db.prepare('CREATE TABLE IF NOT EXISTS meta(k TEXT PRIMARY KEY, v TEXT)').run();
 db.prepare('UPDATE cities SET name=? WHERE name=?').run('Rahim Yar Khan', 'RahimYarKhan');
 
 function cityId(name, province) {
@@ -172,6 +176,56 @@ function cheapest(itemEn) {
   };
 }
 
+function provinceGroups() {
+  const cities = db.prepare(`SELECT c.name name, c.province province,
+    EXISTS(SELECT 1 FROM snapshots s WHERE s.city_id = c.id) has_rates
+    FROM cities c ORDER BY c.province, c.name`).all();
+  const provinces = [];
+  for (const c of cities) {
+    const prov = c.province || 'Other';
+    let g = provinces.find((x) => x.name === prov);
+    if (!g) { g = { name: prov, districts: [] }; provinces.push(g); }
+    g.districts.push({ name: c.name, has_rates: !!c.has_rates });
+  }
+  return { cities, provinces };
+}
+function liveSummary() {
+  const { provinces } = provinceGroups();
+  const per_province = provinces.map((g) => ({
+    name: g.name, districts: g.districts.length,
+    with_rates: g.districts.filter((d) => d.has_rates).length,
+  }));
+  return {
+    latest_date: latestDate(null),
+    provinces: provinces.length,
+    districts: per_province.reduce((a, g) => a + g.districts, 0),
+    districts_with_rates: per_province.reduce((a, g) => a + g.with_rates, 0),
+    per_province,
+  };
+}
+// Pakistan calendar date (Asia/Karachi) as YYYY-MM-DD, plus the day before.
+function pktToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+function dayBefore(iso) {
+  const d = new Date(iso + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+function fetchText(url, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const req = http.get(url, { headers: { 'User-Agent': 'Mandi-Price-Intelligence/2.0' } }, (res) => {
+      if (res.statusCode !== 200) { res.resume(); return reject(new Error('HTTP ' + res.statusCode)); }
+      let data = '';
+      res.setEncoding('utf8');
+      res.on('data', (c) => { data += c; if (data.length > 5000000) req.destroy(new Error('response too large')); });
+      res.on('end', () => resolve(data));
+    });
+    req.setTimeout(timeoutMs, () => req.destroy(new Error('fetch timeout')));
+    req.on('error', reject);
+  });
+}
+
 // ---- HTTP layer ----
 function sendJson(res, code, obj) {
   const body = JSON.stringify(obj);
@@ -205,18 +259,27 @@ const server = http.createServer(async (req, res) => {
     const p = url.pathname;
     if (p === '/api/meta' && req.method === 'GET') {
       const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed-data.json'), 'utf8'));
-      const cities = db.prepare(`SELECT c.name name, c.province province,
-        EXISTS(SELECT 1 FROM snapshots s WHERE s.city_id = c.id) has_rates
-        FROM cities c ORDER BY c.province, c.name`).all();
-      const provinces = [];
-      for (const c of cities) {
-        const prov = c.province || 'Other';
-        let g = provinces.find((x) => x.name === prov);
-        if (!g) { g = { name: prov, districts: [] }; provinces.push(g); }
-        g.districts.push({ name: c.name, has_rates: !!c.has_rates });
-      }
+      const { cities, provinces } = provinceGroups();
       const items = db.prepare('SELECT name_en en, name_ur ur, unit FROM items ORDER BY name_en').all();
       return sendJson(res, 200, { cities, provinces, items, latest_date: latestDate(null), sources: seed.sources, flag_threshold: FLAG_THRESHOLD });
+    }
+    if (p === '/api/provinces' && req.method === 'GET') {
+      const { provinces } = provinceGroups();
+      return sendJson(res, 200, { provinces: provinces.map((g) => ({
+        name: g.name, districts: g.districts.length,
+        with_rates: g.districts.filter((d) => d.has_rates).length,
+      })) });
+    }
+    if (p === '/api/districts' && req.method === 'GET') {
+      const province = url.searchParams.get('province');
+      if (!province) return sendJson(res, 400, { error: 'province required' });
+      const { provinces } = provinceGroups();
+      const g = provinces.find((x) => x.name === province);
+      if (!g) return sendJson(res, 404, { error: 'unknown province' });
+      return sendJson(res, 200, { province: g.name, districts: g.districts });
+    }
+    if (p === '/api/live' && req.method === 'GET') {
+      return sendJson(res, 200, liveSummary());
     }
     if (p === '/api/today' && req.method === 'GET') {
       const city = url.searchParams.get('city') || 'Lahore';
@@ -294,6 +357,60 @@ const server = http.createServer(async (req, res) => {
       if (!body.name) return sendJson(res, 400, { error: 'name required' });
       cityId(body.name, body.province || '');
       return sendJson(res, 200, { ok: true });
+    }
+    if (p === '/api/admin/refresh' && req.method === 'POST') {
+      const body = await readBody(req);
+      if (!body || body.code !== ADMIN_CODE) return sendJson(res, 403, { error: 'bad admin code' });
+      const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+      const lastRow = db.prepare('SELECT v FROM meta WHERE k=?').get('last_refresh');
+      const lastMs = lastRow ? Number(lastRow.v) : 0;
+      if (lastMs && Date.now() - lastMs < REFRESH_INTERVAL_MS && body.force !== true) {
+        return sendJson(res, 200, { ok: false, reason: 'too-soon',
+          retry_after_seconds: Math.ceil((REFRESH_INTERVAL_MS - (Date.now() - lastMs)) / 1000) });
+      }
+      let html;
+      try {
+        html = await fetchText('http://www.amis.pk/daily%20market%20changes.aspx', 30000);
+      } catch (e) {
+        return sendJson(res, 200, { ok: false, reason: 'fetch-failed', detail: e.message });
+      }
+      let parsed;
+      try {
+        parsed = parseAmisHtml(html);
+      } catch (e) {
+        return sendJson(res, 200, { ok: false, reason: 'parse-failed', detail: e.message });
+      }
+      if (parsed.unavailable || parsed.rows.length === 0) {
+        return sendJson(res, 200, { ok: false, reason: parsed.unavailable ? 'amis-unavailable' : 'no-rows-parsed' });
+      }
+      const date = pktToday();
+      const prevDate = dayBefore(date);
+      const itemNames = db.prepare('SELECT name_en FROM items').all().map((r) => r.name_en);
+      const cityProv = new Map(db.prepare('SELECT name, province FROM cities').all().map((r) => [r.name, r.province]));
+      const upsert = db.prepare(`INSERT INTO snapshots(city_id, item_id, variant, date, wholesale, source)
+        VALUES(?,?,?,?,?, 'amis')
+        ON CONFLICT(city_id, item_id, variant, date, source) DO UPDATE SET wholesale=excluded.wholesale`);
+      const existsStmt = db.prepare(`SELECT 1 FROM snapshots s JOIN cities c ON c.id=s.city_id JOIN items i ON i.id=s.item_id
+        WHERE c.name=? AND i.name_en=? AND s.variant=? AND s.date=? AND s.source='amis'`);
+      let inserted = 0, updated = 0, skipped = 0;
+      const unmatched = new Set();
+      for (const row of parsed.rows) {
+        if (!cityProv.has(row.city)) { skipped++; continue; }
+        const mapped = mapCrop(row.crop, itemNames);
+        if (mapped.isNew) unmatched.add(mapped.item);
+        const unit = /banana/i.test(mapped.item) ? 'dozen' : 'kg';
+        const ci = cityId(row.city, cityProv.get(row.city) || '');
+        const ii = itemId(mapped.item, '', unit);
+        if (!itemNames.includes(mapped.item)) itemNames.push(mapped.item);
+        for (const [d, val] of [[date, row.today], [prevDate, row.yesterday]]) {
+          if (existsStmt.get(row.city, mapped.item, mapped.variant, d)) updated++;
+          else inserted++;
+          upsert.run(ci, ii, mapped.variant, d, val);
+        }
+      }
+      db.prepare('INSERT OR REPLACE INTO meta(k, v) VALUES(?, ?)').run('last_refresh', String(Date.now()));
+      return sendJson(res, 200, { ok: true, date, inserted, updated, skipped,
+        unmatched_crops: [...unmatched].sort() });
     }
     if (p === '/api/admin/item' && req.method === 'POST') {
       const body = await readBody(req);

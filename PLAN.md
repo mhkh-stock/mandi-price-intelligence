@@ -84,3 +84,5 @@ alert subscriptions. Each v2 step gets its own test before it ships.
   admin entry stays, stated in README.
 - Tests 28 -> 46, all passing on a fresh DB, including a parser unit test
   on a fixture snippet and an unavailable-service detection test.
+
+Redeploy trigger 2026-11-05 ~20:05 PKT — SnapDeploy auto-deploy after limit reset.

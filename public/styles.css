@@ -3,8 +3,6 @@ body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, san
 .topbar { background: #14532d; color: #fff; padding: 14px 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 .topbar .logo { font-size: 20px; font-weight: 800; }
 .topbar .urdu { font-weight: 400; opacity: .85; }
-.topbar nav a { color: #d1fae5; margin-left: 16px; text-decoration: none; }
-.topbar nav a:hover { text-decoration: underline; }
 .hero { background: linear-gradient(135deg, #14532d, #15803d); color: #fff; padding: 34px 22px; }
 .hero h1 { margin: 0 0 8px; font-size: 30px; }
 .hero p { max-width: 760px; opacity: .92; }
@@ -40,3 +38,49 @@ footer { max-width: 1060px; margin: 0 auto; padding: 10px 22px 40px; color: #6b7
 .district-list a.no-rates { color: #64748b; }
 .prov-chip { margin: 4px 6px 0 0; padding: 6px 14px; border: 0; border-radius: 20px; background: #14532d; color: #fff; font-size: 14px; cursor: pointer; }
 .prov-chip:hover { background: #15803d; }
+
+/* ---- sticky header + kebab menu (nav redesign) ---- */
+/* One header everywhere: logo left, primary CTA + kebab button right.
+   2-3 primary links stay visible on desktop; everything else lives in
+   the overflow menu, grouped with small headings. */
+.topbar { position: sticky; top: 0; z-index: 50; flex-wrap: nowrap; }
+.topbar .logo { flex: 1 1 auto; min-width: 0; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; position: relative; flex: none; }
+.cta-register { background: #facc15; color: #422006; font-weight: 700; padding: 10px 18px; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; white-space: nowrap; }
+.cta-register:hover { background: #eab308; }
+.cta-register[aria-current="page"] { outline: 2px solid #fff; outline-offset: 2px; }
+/* Secondary header action: outlined, clearly separate from Register. */
+.btn-login { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.75); font-weight: 700; padding: 10px 16px; border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; white-space: nowrap; }
+.btn-login:hover { background: rgba(255,255,255,.12); border-color: #fff; }
+.btn-login[aria-current="page"] { background: rgba(255,255,255,.16); border-color: #fff; }
+/* Kebab: a visibly designed round button, not a bare character. */
+.menu-btn { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; font-size: 22px; line-height: 1; width: 44px; min-width: 44px; min-height: 44px; padding: 0; cursor: pointer; }
+.menu-btn:hover { background: rgba(255,255,255,.24); border-color: rgba(255,255,255,.6); }
+.menu-btn:active { background: rgba(255,255,255,.32); }
+.menu-btn:focus-visible { outline: 2px solid #facc15; outline-offset: 2px; }
+.menu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 260px; background: #fff; color: #1f2937; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px 0 10px; z-index: 60; }
+.menu[hidden] { display: none; }
+.menu-group { margin: 10px 14px 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #15803d; }
+.menu a[role="menuitem"] { display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 44px; color: #1f2937; text-decoration: none; }
+.menu a[role="menuitem"]:hover { background: #f0fdf4; }
+.menu a[role="menuitem"][aria-current="page"] { background: #dcfce7; font-weight: 700; }
+/* Back button, top of every sub-page (iOS HIG: sub-pages use a back
+   button, not a leading menu button). */
+.back-btn { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 16px; border: 2px solid #14532d; color: #14532d; background: #fff; border-radius: 8px; font-weight: 700; text-decoration: none; margin-bottom: 10px; }
+.back-btn:hover { background: #f0fdf4; }
+/* Register page: the two paths as separate cards, never a crammed row. */
+.role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 10px 0 16px; }
+@media (max-width: 700px) { .role-cards { grid-template-columns: 1fr; } }
+.role-card { display: block; text-align: left; background: #fff; border: 2px solid #e5e7eb; border-radius: 12px; padding: 16px; cursor: pointer; color: #1f2937; min-height: 44px; }
+.role-card:hover { border-color: #15803d; }
+.role-card.selected { border-color: #15803d; background: #f0fdf4; }
+.role-card strong { display: block; font-size: 17px; margin-bottom: 6px; }
+.role-card span { display: block; font-size: 14px; color: #6b7280; font-weight: 400; }
+/* Small link-style button (e.g. "Change role" on the register form). */
+.text-btn { background: none; color: #15803d; border: 0; padding: 0; min-height: 0; font-size: 14px; font-weight: 700; text-decoration: underline; cursor: pointer; }
+@media (max-width: 480px) {
+  .topbar .logo { font-size: 17px; }
+  .topbar .page-name { display: none; }
+  .cta-register { padding: 10px 12px; }
+  .btn-login { padding: 10px 12px; }
+}

@@ -8,10 +8,27 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="logo">🥬 Mandi Price Intelligence — Admin</div>
-  <nav><a href="index.html">← Back to rates</a></nav>
+  <div class="logo">🥬 Mandi Price Intelligence<span class="page-name"> — Admin</span></div>
+  <div class="topbar-actions">
+    <a class="cta-register" href="register.html">Register</a>
+    <a class="btn-login" href="login.html">Log in</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu">⋮</button>
+    <div class="menu" id="siteMenu" role="menu" hidden>
+      <p class="menu-group" role="presentation">Rates</p>
+      <a role="menuitem" href="index.html#today"><span aria-hidden="true">📈</span> Today's Rates</a>
+      <a role="menuitem" href="index.html#allDistricts"><span aria-hidden="true">🗺️</span> All Districts</a>
+      <a role="menuitem" href="index.html#movers"><span aria-hidden="true">📊</span> Movers</a>
+      <a role="menuitem" href="index.html#checker"><span aria-hidden="true">🛡️</span> Overcharge Checker</a>
+      <a role="menuitem" href="index.html#chat"><span aria-hidden="true">💬</span> Rate Chat</a>
+      <p class="menu-group" role="presentation">Admin</p>
+      <a role="menuitem" href="admin.html" aria-current="page"><span aria-hidden="true">🔑</span> Admin</a>
+      <a role="menuitem" href="district-admin.html"><span aria-hidden="true">🏛️</span> District Admin</a>
+      <a role="menuitem" href="manager.html"><span aria-hidden="true">🧑‍🌾</span> Manager</a>
+    </div>
+  </div>
 </header>
 <section class="section">
+  <a class="back-btn" href="index.html">← Back to home</a>
   <h2>Admin</h2>
   <p class="note">Add each day's snapshot and the history, movers and checker update themselves. The admin code is a demo-grade shared code — set ADMIN_CODE on deploy.</p>
   <div class="row">
@@ -117,5 +134,6 @@
   </table></div>
 </section>
 <script src="admin.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>

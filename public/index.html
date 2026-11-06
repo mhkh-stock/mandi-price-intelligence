@@ -9,17 +9,23 @@
 <body>
 <header class="topbar">
   <div class="logo">🥬 Mandi Price Intelligence <span class="urdu">منڈی ریٹ</span></div>
-  <nav>
-    <a href="#today">Today's Rates</a>
-    <a href="#movers">Movers</a>
-    <a href="#checker">Overcharge Checker</a>
-    <a href="#chat">Rate Chat</a>
-    <a href="#allDistricts">All Districts</a>
-    <a href="admin.html">Admin</a>
-    <a href="district-admin.html">District Admin</a>
-    <a href="manager.html">Manager</a>
-    <a href="register.html">Register</a>
-  </nav>
+  <div class="topbar-actions">
+    <a class="cta-register" href="register.html">Register</a>
+    <a class="btn-login" href="login.html">Log in</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu">⋮</button>
+    <div class="menu" id="siteMenu" role="menu" hidden>
+      <p class="menu-group" role="presentation">Rates</p>
+      <a role="menuitem" href="#today"><span aria-hidden="true">📈</span> Today's Rates</a>
+      <a role="menuitem" href="#allDistricts"><span aria-hidden="true">🗺️</span> All Districts</a>
+      <a role="menuitem" href="#movers"><span aria-hidden="true">📊</span> Movers</a>
+      <a role="menuitem" href="#checker"><span aria-hidden="true">🛡️</span> Overcharge Checker</a>
+      <a role="menuitem" href="#chat"><span aria-hidden="true">💬</span> Rate Chat</a>
+      <p class="menu-group" role="presentation">Admin</p>
+      <a role="menuitem" href="admin.html"><span aria-hidden="true">🔑</span> Admin</a>
+      <a role="menuitem" href="district-admin.html"><span aria-hidden="true">🏛️</span> District Admin</a>
+      <a role="menuitem" href="manager.html"><span aria-hidden="true">🧑‍🌾</span> Manager</a>
+    </div>
+  </div>
 </header>
 
 <section class="hero">
@@ -145,5 +151,6 @@
 </footer>
 
 <script src="app.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>

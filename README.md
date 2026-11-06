@@ -367,3 +367,5 @@ Still open (not blocking the push):
 - Before real public use / sale: set a private `ADMIN_CODE` on the
   container (there is no default — the app refuses to start without it)
   and create real district rate-admins (none seeded in production yet).
+
+<!-- Deploy trigger: v3.0 + v3.1 + v3.2-v3.3 live push, 2026-11-06 -->

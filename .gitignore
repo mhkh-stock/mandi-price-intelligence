@@ -1,0 +1,8 @@
+# Uploads (licence scans + rates-page photos) live on the container disk
+# and are lost on redeploy — they must NEVER be pushed to GitHub.
+uploads/
+# Local runtime data (sqlite DBs created by local runs).
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

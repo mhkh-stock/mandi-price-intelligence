@@ -8,10 +8,27 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="logo">🥬 Mandi Price Intelligence — Public API</div>
-  <nav><a href="index.html">← Back to rates</a></nav>
+  <div class="logo">🥬 Mandi Price Intelligence<span class="page-name"> — Public API</span></div>
+  <div class="topbar-actions">
+    <a class="cta-register" href="register.html">Register</a>
+    <a class="btn-login" href="login.html">Log in</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu">⋮</button>
+    <div class="menu" id="siteMenu" role="menu" hidden>
+      <p class="menu-group" role="presentation">Rates</p>
+      <a role="menuitem" href="index.html#today"><span aria-hidden="true">📈</span> Today's Rates</a>
+      <a role="menuitem" href="index.html#allDistricts"><span aria-hidden="true">🗺️</span> All Districts</a>
+      <a role="menuitem" href="index.html#movers"><span aria-hidden="true">📊</span> Movers</a>
+      <a role="menuitem" href="index.html#checker"><span aria-hidden="true">🛡️</span> Overcharge Checker</a>
+      <a role="menuitem" href="index.html#chat"><span aria-hidden="true">💬</span> Rate Chat</a>
+      <p class="menu-group" role="presentation">Admin</p>
+      <a role="menuitem" href="admin.html"><span aria-hidden="true">🔑</span> Admin</a>
+      <a role="menuitem" href="district-admin.html"><span aria-hidden="true">🏛️</span> District Admin</a>
+      <a role="menuitem" href="manager.html"><span aria-hidden="true">🧑‍🌾</span> Manager</a>
+    </div>
+  </div>
 </header>
 <section class="section">
+  <a class="back-btn" href="index.html">← Back to home</a>
   <h2>Public live API</h2>
   <p class="note">Free JSON, no key needed, no sign-up. Every rate carries its source and date — nothing is estimated. This API serves this app's own database; there is no official government API for mandi rates, and this does not claim to be one.</p>
   <table>
@@ -57,5 +74,6 @@
   </table>
   <p class="note">Daily refresh: the admin panel pulls the public AMIS daily-changes page each day (wholesale only) and upserts it as a new dated snapshot. The AMIS ViewPrices database (~140 markets, all commodities) is refreshed the same way, at most once every 6 hours — values far outside the day's range are never auto-published; they wait in the review queue instead. Districts with no snapshot yet show their province hub's latest rates instead, clearly labelled with <code>nearest_rates_from</code> and <code>nearest_rates_date</code> — and only when the hub's rates are dated today or yesterday; otherwise they return empty rows, honestly — never estimated. Karachi retail is entered manually because its source page is not reliably parseable.</p>
 </section>
+<script src="nav.js"></script>
 </body>
 </html>

@@ -4,6 +4,29 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const DOC_TYPES = ['Appointment Letter', 'Posting-Transfer Order', 'Service Card', 'Market Committee Authorisation', 'CNIC', 'Other'];
 let registeredUser = '';
 let registeredDocs = [];
+// Registration portal: the two role cards open the form with that role
+// preselected (manager is the default, as before). The form stays hidden
+// until a role is picked — or a ?role=head|manager link opens it directly.
+let selectedRole = 'manager';
+function showForm(role) {
+  selectedRole = role;
+  document.querySelectorAll('.role-card').forEach((c) => {
+    const on = c.dataset.role === role;
+    c.classList.toggle('selected', on);
+    c.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  $('regRoleLabel').textContent = role === 'head' ? 'District Head' : 'Food Manager';
+  $('rolePicker').hidden = true;
+  $('regForm').hidden = false;
+  $('regForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function showPicker() { $('rolePicker').hidden = false; $('regForm').hidden = true; }
+document.querySelectorAll('.role-card').forEach((card) => {
+  card.addEventListener('click', () => showForm(card.dataset.role));
+});
+$('changeRoleBtn').addEventListener('click', showPicker);
+const qRole = new URLSearchParams(window.location.search).get('role');
+if (qRole === 'head' || qRole === 'manager') showForm(qRole);
 
 function docRow(n) {
   const div = document.createElement('div');
@@ -55,7 +78,7 @@ $('regBtn').addEventListener('click', async () => {
     designation: $('regDesig').value.trim(),
     documents: readDocs(),
   };
-  const role = $('regRole').value;
+  const role = selectedRole;
   const data = await (await fetch('/api/register/' + role, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
   if (!data.ok) { showMsg('regMsg', 'Registration failed: ' + (data.error || 'unknown error')); return; }
   registeredUser = data.username;

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — Mandi Price Intelligence</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">🥬 Mandi Price Intelligence<span class="page-name"> — Log in</span></div>
+  <div class="topbar-actions">
+    <a class="cta-register" href="register.html">Register</a>
+    <a class="btn-login" href="login.html" aria-current="page">Log in</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu">⋮</button>
+    <div class="menu" id="siteMenu" role="menu" hidden>
+      <p class="menu-group" role="presentation">Rates</p>
+      <a role="menuitem" href="index.html#today"><span aria-hidden="true">📈</span> Today's Rates</a>
+      <a role="menuitem" href="index.html#allDistricts"><span aria-hidden="true">🗺️</span> All Districts</a>
+      <a role="menuitem" href="index.html#movers"><span aria-hidden="true">📊</span> Movers</a>
+      <a role="menuitem" href="index.html#checker"><span aria-hidden="true">🛡️</span> Overcharge Checker</a>
+      <a role="menuitem" href="index.html#chat"><span aria-hidden="true">💬</span> Rate Chat</a>
+      <p class="menu-group" role="presentation">Admin</p>
+      <a role="menuitem" href="admin.html"><span aria-hidden="true">🔑</span> Admin</a>
+      <a role="menuitem" href="district-admin.html"><span aria-hidden="true">🏛️</span> District Admin</a>
+      <a role="menuitem" href="manager.html"><span aria-hidden="true">🧑‍🌾</span> Manager</a>
+    </div>
+  </div>
+</header>
+<section class="section">
+  <a class="back-btn" href="index.html">← Back to home</a>
+  <h2>Log in</h2>
+  <p class="note">District heads and food managers log in here with the account they registered. Your account must already be approved — a pending account cannot log in yet. Pick your role to open the right login form.</p>
+  <div class="role-cards" role="group" aria-label="Choose how to log in">
+    <a class="role-card" href="district-admin.html">
+      <strong>Log in as District Head</strong>
+      <span>District Food Controller / district rate-admin. Manage your district's rates and approve its managers.</span>
+    </a>
+    <a class="role-card" href="manager.html">
+      <strong>Log in as Manager</strong>
+      <span>Food manager under your district head. Propose rates and upload the official rates-page photo for your assigned places.</span>
+    </a>
+  </div>
+  <p class="note">Master admin? There is no master login form here — the master signs in with the master code on the <a href="admin.html">Admin page</a>, exactly as before.</p>
+  <p class="note">No account yet? <a href="register.html">Register as a district head or manager</a> — your account stays pending until it is approved.</p>
+</section>
+<script src="nav.js"></script>
+</body>
+</html>

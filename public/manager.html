@@ -8,10 +8,27 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="logo">🥬 Mandi Price Intelligence — Manager</div>
-  <nav><a href="index.html">← Back to rates</a> <a href="register.html">Register</a></nav>
+  <div class="logo">🥬 Mandi Price Intelligence<span class="page-name"> — Manager</span></div>
+  <div class="topbar-actions">
+    <a class="cta-register" href="register.html">Register</a>
+    <a class="btn-login" href="login.html">Log in</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="siteMenu" aria-label="Menu">⋮</button>
+    <div class="menu" id="siteMenu" role="menu" hidden>
+      <p class="menu-group" role="presentation">Rates</p>
+      <a role="menuitem" href="index.html#today"><span aria-hidden="true">📈</span> Today's Rates</a>
+      <a role="menuitem" href="index.html#allDistricts"><span aria-hidden="true">🗺️</span> All Districts</a>
+      <a role="menuitem" href="index.html#movers"><span aria-hidden="true">📊</span> Movers</a>
+      <a role="menuitem" href="index.html#checker"><span aria-hidden="true">🛡️</span> Overcharge Checker</a>
+      <a role="menuitem" href="index.html#chat"><span aria-hidden="true">💬</span> Rate Chat</a>
+      <p class="menu-group" role="presentation">Admin</p>
+      <a role="menuitem" href="admin.html"><span aria-hidden="true">🔑</span> Admin</a>
+      <a role="menuitem" href="district-admin.html"><span aria-hidden="true">🏛️</span> District Admin</a>
+      <a role="menuitem" href="manager.html" aria-current="page"><span aria-hidden="true">🧑‍🌾</span> Manager</a>
+    </div>
+  </div>
 </header>
 <section class="section">
+  <a class="back-btn" href="index.html">← Back to home</a>
   <h2>District food manager</h2>
   <p class="note">You enter rates for the places your district head assigned you — nothing you propose goes live until your head approves it. You can only see your own district, and inside it only your own assigned places. If your account is still pending approval, you cannot log in yet.</p>
   <div id="loginBox">
@@ -68,5 +85,6 @@
   </div>
 </section>
 <script src="manager.js"></script>
+<script src="nav.js"></script>
 </body>
 </html>

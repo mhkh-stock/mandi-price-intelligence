@@ -156,6 +156,32 @@ async function waitReady(port) {
     const home2Html = await home2.text();
     check('homepage has freshness line element', home2Html.includes('id="freshnessLine"'), home2Html.length);
 
+    // ---- nav redesign (sticky header + kebab menu + portals) ----
+    const css = await (await fetch(BASE + '/styles.css')).text();
+    check('header CSS is sticky with kebab menu, two header buttons, back button and role-card styles',
+      css.includes('position: sticky') && css.includes('.menu-btn') && css.includes('.cta-register') && css.includes('.btn-login') && css.includes('.back-btn') && css.includes('.role-card'), css.length);
+    const homeNavHtml = await (await fetch(BASE + '/')).text();
+    check('homepage header has Register + Log in buttons and grouped kebab menu (Rates + Admin)',
+      homeNavHtml.includes('id="menuBtn"') && homeNavHtml.includes('aria-haspopup="menu"') && homeNavHtml.includes('aria-controls="siteMenu"') && homeNavHtml.includes('id="siteMenu"') && homeNavHtml.includes('>Rates<') && homeNavHtml.includes('>Admin<') && homeNavHtml.includes('class="cta-register"') && homeNavHtml.includes('href="register.html">Register</a>') && homeNavHtml.includes('class="btn-login"') && homeNavHtml.includes('href="login.html">Log in</a>'), homeNavHtml.length);
+    check('homepage menu lists all 8 destinations; Register and Log in each appear once, as header buttons only',
+      ['href="#today"', 'href="#allDistricts"', 'href="#movers"', 'href="#checker"', 'href="#chat"', 'href="admin.html"', 'href="district-admin.html"', 'href="manager.html"'].every((h) => homeNavHtml.includes(h)) && (homeNavHtml.match(/href="register\.html"/g) || []).length === 1 && (homeNavHtml.match(/href="login\.html"/g) || []).length === 1, homeNavHtml.length);
+    const navJs = await fetch(BASE + '/nav.js');
+    const navJsText = await navJs.text();
+    check('shared nav.js serves 200 with menu toggle, Escape close and aria-current',
+      navJs.status === 200 && navJsText.includes('aria-expanded') && navJsText.includes('Escape') && navJsText.includes('aria-current'), navJsText.length);
+    for (const page of ['admin.html', 'district-admin.html', 'manager.html', 'register.html', 'api.html', 'login.html']) {
+      const r = await fetch(BASE + '/' + page);
+      const h = await r.text();
+      check(page + ' serves 200 with kebab menu + back button',
+        r.status === 200 && h.includes('id="menuBtn"') && h.includes('id="siteMenu"') && h.includes('class="back-btn"') && h.includes('← Back to home'), h.length);
+    }
+    const regHtml = await (await fetch(BASE + '/register.html')).text();
+    check('register portal has two role cards and a hidden form with the role preselected on choice',
+      regHtml.includes('data-role="head"') && regHtml.includes('data-role="manager"') && regHtml.includes('Register as District Head') && regHtml.includes('Register as Food Manager') && !regHtml.includes('select id="regRole"') && regHtml.includes('id="regForm" hidden') && regHtml.includes('id="regRoleLabel"') && regHtml.includes('id="changeRoleBtn"'), regHtml.length);
+    const loginHtml = await (await fetch(BASE + '/login.html')).text();
+    check('login portal lists head + manager logins as separate cards, no master login form',
+      loginHtml.includes('Log in as District Head') && loginHtml.includes('Log in as Manager') && loginHtml.includes('href="district-admin.html"') && loginHtml.includes('href="manager.html"') && !loginHtml.includes('Admin code') && !loginHtml.includes('X-Master-Code'), loginHtml.length);
+
     // ---- v2.2 nearest-rates fallback ----
     // (b) a district WITH rates returns its own rates, no fallback flag.
     const lahore2 = await j('/api/today?city=Lahore');

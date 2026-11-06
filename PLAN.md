@@ -401,3 +401,5 @@ Redeploy trigger 2026-11-05 ~20:05 PKT — SnapDeploy auto-deploy after limit re
   (2026-11-06, AMIS), cheapest potato Okara 23.50, cheapest tomato
   Sahiwal 148.50. Tests updated to the new real values only (327 checks,
   ALL TESTS PASSED 3x); the two fallback checks pass again.
+
+## 2026-11-06 — nav redesign live (Register + Log in buttons, designed kebab menu, role portals, Back to home)

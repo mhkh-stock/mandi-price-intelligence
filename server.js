@@ -343,19 +343,21 @@ function rowsFor(cityName, date) {
     };
   });
 }
-// Nearest-rates fallback (v2.2): the province hub's rows, but ONLY when
-// the hub actually has rates dated today or yesterday (PKT). A stale hub
-// (e.g. Peshawar's 2026-11-02 survey once it ages out) or a hub with no
-// rates at all returns null — the district then stays honestly empty.
-// Never invents rates and never relabels hub rates as the district's own.
+// Nearest-rates fallback (v2.2, relaxed to 7 days on Hashir's order
+// 2026-11-06): the province hub's rows, but ONLY when the hub's latest
+// rates are at most 7 days old (PKT) — always date-labelled. A hub older
+// than 7 days, or a hub with no rates at all, returns null — the district
+// then stays honestly empty. Never invents rates and never relabels hub
+// rates as the district's own.
+const FALLBACK_MAX_AGE_DAYS = 7;
 function nearestFallback(cityName) {
   const row = db.prepare('SELECT province FROM cities WHERE name=?').get(cityName);
   const hub = row ? PROVINCE_HUBS[row.province] : null;
   if (!hub || hub === cityName) return null;
   const hubDate = latestDate(hub);
   if (!hubDate) return null;
-  const today = pktToday();
-  if (hubDate !== today && hubDate !== dayBefore(today)) return null;
+  const ageDays = daysOld(hubDate);
+  if (ageDays < 0 || ageDays > FALLBACK_MAX_AGE_DAYS) return null;
   const rows = rowsFor(hub, hubDate);
   if (!rows.length) return null;
   return { from: hub, date: hubDate, rows };
@@ -457,6 +459,10 @@ function dayBefore(iso) {
   const d = new Date(iso + 'T12:00:00Z');
   d.setUTCDate(d.getUTCDate() - 1);
   return d.toISOString().slice(0, 10);
+}
+// Whole days between an ISO date and today (PKT); negative if in the future.
+function daysOld(iso) {
+  return Math.round((Date.parse(pktToday() + 'T12:00:00Z') - Date.parse(iso + 'T12:00:00Z')) / 86400000);
 }
 function fetchText(url, timeoutMs) {
   return new Promise((resolve, reject) => {

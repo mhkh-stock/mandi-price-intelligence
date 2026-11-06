@@ -59,15 +59,81 @@ async function loadMeta() {
 }
 async function loadToday() {
   const city = $('citySelect').value;
-  const data = await (await fetch('/api/today?city=' + encodeURIComponent(city))).json();
+  const cat = $('catSelect') ? $('catSelect').value : '';
+  const data = await (await fetch('/api/today?city=' + encodeURIComponent(city) + (cat ? '&category=' + encodeURIComponent(cat) : ''))).json();
   $('todayCity').textContent = city;
   $('dateBadge').textContent = data.date ? 'Rates as of ' + data.date : 'No rates recorded yet for this district';
+  // Official district (v3.1): when a district has an active licensed head,
+  // say so — designation + district only. The officer's name and licence
+  // number are never shown to the public.
+  const ol = $('officialLine');
+  if (ol) {
+    ol.textContent = data.official
+      ? `Officially managed by ${data.official.designation}, ${data.official.district}`
+      : '';
+  }
+  // Nearest-rates fallback (v2.2): one clear line, only when the rates shown
+  // are the province hub's — never presented as the district's own.
+  const nn = $('nearestNote');
+  if (nn) {
+    nn.textContent = data.nearest_rates_from
+      ? `${city} has no published rates yet — nearest rates: ${data.nearest_rates_from}, ${data.nearest_rates_date}`
+      : '';
+  }
   $('ratesBody').innerHTML = data.rows.length
-    ? data.rows.map((r) => `<tr><td><strong>${esc(r.item)}</strong> ${esc(r.ur)}${r.variant ? ' (' + esc(r.variant) + ')' : ''}</td><td>${r.wholesale_per_unit === null ? '—' : fmt(r.wholesale_per_unit) + ' / ' + esc(r.unit)}</td><td>${r.retail_bazaar === null ? '—' : fmt(r.retail_bazaar) + ' / kg'}</td><td class="${r.change_pct > 0 ? 'up' : r.change_pct < 0 ? 'down' : ''}">${pct(r.change_pct)}</td><td>${r.flag ? '<span class="flag">⚠️ verify — unusual jump</span>' : ''}</td></tr>`).join('')
-    : `<tr><td colspan="5">No rates recorded yet for ${esc(city)}. Districts appear here with their daily snapshot as soon as it is added — nothing is estimated or filled in meanwhile.</td></tr>`;
+    ? data.rows.map((r) => `<tr><td><strong>${esc(r.item)}</strong> ${esc(r.ur)}${r.variant ? ' (' + esc(r.variant) + ')' : ''}</td><td>${r.wholesale_per_unit === null ? '—' : fmt(r.wholesale_per_unit) + ' / ' + esc(r.unit_ur || r.unit)}</td><td>${r.retail_bazaar === null ? '—' : fmt(r.retail_bazaar) + ' / ' + esc(r.unit_ur || r.unit)}</td><td class="${r.change_pct > 0 ? 'up' : r.change_pct < 0 ? 'down' : ''}">${pct(r.change_pct)}</td><td>${r.flag ? '<span class="flag">⚠️ verify — unusual jump</span>' : ''}</td></tr>`).join('')
+    : `<tr><td colspan="5">No rates recorded yet for ${esc(city)}${cat ? ' in this category' : ''}. Districts appear here with their daily snapshot as soon as it is added — nothing is estimated or filled in meanwhile.</td></tr>`;
   const mv = await (await fetch('/api/movers?city=' + encodeURIComponent(city) + '&limit=5')).json();
   $('risers').innerHTML = mv.rises.map((r) => `<li>${esc(r.item)}: <span class="up">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';
   $('fallers').innerHTML = mv.falls.map((r) => `<li>${esc(r.item)}: <span class="down">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';
+  await loadPhotos(city);
+  await loadFreshness();
+}
+// Official rates-page photos (v3.3): the latest approved photo per place,
+// plus a small history. Only approved photos are ever shown here.
+async function loadPhotos(city) {
+  const box = $('photosBox');
+  if (!box) return;
+  const pc = $('photosCity');
+  if (pc) pc.textContent = city;
+  try {
+    const data = await (await fetch('/api/district/photos?district=' + encodeURIComponent(city))).json();
+    const latest = Object.values(data.latest_by_place || {});
+    const history = (data.history || []).slice(1);
+    if (!latest.length && !history.length) {
+      box.innerHTML = '<p class="note">No official rates-page photo published for this district yet.</p>';
+      return;
+    }
+    box.innerHTML = latest.map((p) => `<figure class="card" style="display:inline-block;vertical-align:top;margin:0 12px 12px 0;max-width:320px">
+      <img src="${esc(p.file_url)}" alt="Official rates page — ${esc(p.place)}, ${esc(p.date)}" style="max-width:100%;border-radius:8px">
+      <figcaption><strong>Official rates page</strong> — ${esc(p.place)} · ${esc(p.date)} · ${esc(p.source_label)}</figcaption>
+    </figure>`).join('')
+    + (history.length ? `<h3>Recent days</h3><ul>${history.map((p) => `<li><a href="${esc(p.file_url)}" target="_blank" rel="noopener">${esc(p.place)} — ${esc(p.date)} (${esc(p.source_label)})</a></li>`).join('')}</ul>` : '');
+  } catch { box.innerHTML = '<p class="note">Photos could not be loaded right now.</p>'; }
+}
+// Freshness line: how new are the rates on file? Never claims fresh data
+// when the stored date is old — it says plainly that today's update is pending.
+function pktDate(offsetDays) {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+}
+async function loadFreshness() {
+  const el = $('freshnessLine');
+  if (!el) return;
+  let live;
+  try {
+    live = await (await fetch('/api/live')).json();
+  } catch {
+    el.textContent = 'Rates update status unavailable right now.';
+    return;
+  }
+  const rd = live.rates_date;
+  if (!rd) {
+    el.textContent = 'No rates recorded yet — today\u2019s update pending.';
+    return;
+  }
+  if (rd >= pktDate(-1)) el.textContent = `Rates updated: ${rd} \u2022 Source: AMIS Pakistan`;
+  else el.textContent = `Rates from ${rd} \u2014 today\u2019s update pending`;
 }
 async function loadCheapest() {
   const item = $('cheapItem').value;
@@ -121,6 +187,22 @@ async function loadTrend() {
   const data = await (await fetch('/api/history?item=' + encodeURIComponent($('trendItem').value) + '&city=' + encodeURIComponent($('trendCity').value))).json();
   drawChart(data.points);
 }
+async function askChat() {
+  const q = $('chatQ').value.trim();
+  const box = $('chatAnswer');
+  if (!q) { box.textContent = 'Please type a question first.'; return; }
+  box.textContent = 'Searching the rates on file…';
+  try {
+    const data = await (await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q }) })).json();
+    if (data.error) { box.textContent = data.error; return; }
+    box.innerHTML = esc(data.answer) + (data.fallback ? '<br><span class="note">Nearest-rates fallback — this is the hub’s rate, not the district’s own.</span>' : '');
+  } catch {
+    box.textContent = 'The chat is unavailable right now — please try again.';
+  }
+}
+$('chatBtn').addEventListener('click', askChat);
+$('chatQ').addEventListener('keydown', (e) => { if (e.key === 'Enter') askChat(); });
+if ($('catSelect')) $('catSelect').addEventListener('change', loadToday);
 $('cheapBtn').addEventListener('click', loadCheapest);
 $('checkBtn').addEventListener('click', runCheck);
 $('trendBtn').addEventListener('click', loadTrend);

@@ -15,7 +15,7 @@
   <h2>Admin</h2>
   <p class="note">Add each day's snapshot and the history, movers and checker update themselves. The admin code is a demo-grade shared code — set ADMIN_CODE on deploy.</p>
   <div class="row">
-    <label>Admin code <input id="code" type="password" placeholder="mandi-admin"></label>
+    <label>Admin code <input id="code" type="password" placeholder="Admin code"></label>
     <button id="loadBtn">Load recent snapshots</button>
   </div>
   <h3>Add daily snapshot</h3>
@@ -37,8 +37,65 @@
   <p class="note">Pulls today's AMIS daily-changes page and upserts it as a new dated snapshot (wholesale only, source “amis”). Runs at most once every 30 minutes. Karachi retail stays manual — its page format is not reliably parseable.</p>
   <div class="row">
     <button id="refreshBtn">Refresh live data now</button>
+    <button id="refreshVpBtn">Refresh AMIS price database (ViewPrices)</button>
   </div>
   <div id="refreshMsg" class="result" style="display:none"></div>
+  <h3>Create district rate-admin (licensed district head)</h3>
+  <p class="note">Each district has ONE head — a government officer (for example the District Food Controller) or the local person the master appoints for that district. Before creating the account, check the officer's appointment document yourself (appointment letter, posting / transfer order, service card, Market Committee authorisation or CNIC) and record it here — officers hold no commercial licence, so there is no licence number. There is no automatic government check: no public system verifies a government appointment, and this site never claims to verify one. The account starts INACTIVE — activate it below, and the district becomes officially managed: only that licensed admin can then enter its rates, and the master cannot enter rates directly for it. Suspend ends the login immediately. The officer's name and document numbers are shown only here, never on the public site — the public sees only the designation and district.</p>
+  <div class="row">
+    <label>Username <input id="daNewUser" placeholder="e.g. nowshera-admin"></label>
+    <label>Password (min 8 chars) <input id="daNewPass" type="password"></label>
+    <label>District <select id="daNewDistrict"></select></label>
+    <label>Officer name <input id="daOfficer" placeholder="e.g. Ahmed Raza"></label>
+    <label>Designation <input id="daDesignation" placeholder="e.g. District Food Controller"></label>
+  </div>
+  <div class="row">
+    <label>Document type <select id="daDocType"><option>Appointment Letter</option><option>Posting-Transfer Order</option><option>Service Card</option><option>Market Committee Authorisation</option><option>CNIC</option><option>Other</option></select></label>
+    <label>Document number <input id="daDocNum" placeholder="e.g. PPSC-2024-118"></label>
+    <label>Issuing authority <input id="daDocAuth" placeholder="e.g. Punjab Food Department"></label>
+    <label>Issue date <input id="daDocDate" type="date"></label>
+    <button id="daCreateBtn">Create district admin</button>
+    <button id="daListBtn">List district admins</button>
+  </div>
+  <div id="daMsg" class="result" style="display:none"></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Username</th><th>District</th><th>Officer</th><th>Designation</th><th>Documents</th><th>Status</th><th></th></tr></thead>
+    <tbody id="daBody"></tbody>
+  </table></div>
+  <h3>Pending registrations</h3>
+  <p class="note">District heads who registered themselves wait here for your approval; managers of districts with no head yet wait here too (managers of districts WITH a head are approved by their head, on the district-admin page). Check their documents — and their scans — before approving. A rejected registration can never log in.</p>
+  <div class="row">
+    <button id="pendingLoadBtn">Load pending registrations</button>
+  </div>
+  <div id="pendingMsg" class="result" style="display:none"></div>
+  <h4>Pending heads</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Username</th><th>District</th><th>Name</th><th>Designation</th><th>Documents</th><th></th></tr></thead>
+    <tbody id="pendingHeadBody"></tbody>
+  </table></div>
+  <h4>Pending managers (no-head districts)</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Username</th><th>District</th><th>Name</th><th>Designation</th><th>Documents</th><th></th></tr></thead>
+    <tbody id="pendingMgrBody"></tbody>
+  </table></div>
+  <h3>District-admin audit log</h3>
+  <p class="note">Every district-admin action — who (username, designation, document ref), which district, what was done. Master only.</p>
+  <div class="row">
+    <button id="auditLoadBtn">Load audit log</button>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>When</th><th>Admin</th><th>District</th><th>Designation</th><th>Document ref</th><th>Action</th><th>Detail</th></tr></thead>
+    <tbody id="auditBody"></tbody>
+  </table></div>
+  <h3>Review queue</h3>
+  <p class="note">Proposed rates wait here until approved — from the morning AI search, from the AMIS outlier check, or from a district admin's draft. Only approved rates show to the public.</p>
+  <div class="row">
+    <button id="queueLoadBtn">Load pending proposals</button>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Item</th><th>District</th><th>Price</th><th>Source</th><th>Date</th><th>Proposed by</th><th></th></tr></thead>
+    <tbody id="queueBody"></tbody>
+  </table></div>
   <h3>Add new district</h3>
   <div class="row">
     <label>District name <input id="dName" placeholder="e.g. Nowshera"></label>
@@ -50,6 +107,7 @@
     <label>English name <input id="iEn" placeholder="Tomato"></label>
     <label>Urdu name <input id="iUr" placeholder="ٹماٹر"></label>
     <label>Unit <select id="iUnit"><option>kg</option><option>dozen</option></select></label>
+    <label>Category <select id="iCat"><option value="vegetables">Vegetables — سبزیاں</option><option value="fruits">Fruits — پھل</option><option value="other">Other — دیگر</option></select></label>
     <button id="itemBtn">Add item</button>
   </div>
   <h3>Recent snapshots</h3>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register — Mandi Price Intelligence</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">🥬 Mandi Price Intelligence — Register</div>
+  <nav><a href="index.html">← Back to rates</a></nav>
+</header>
+<section class="section">
+  <h2>Register as a district officer</h2>
+  <p class="note">District heads and food managers register here. Your account stays <strong>pending</strong> until it is approved — a head is approved by the master, a manager by the head of their own district. Only after approval can you log in and work. Registration asks for your appointment documents (appointment letter, posting / transfer order, service card, Market Committee authorisation or CNIC) — government officers do not hold a commercial licence, so there is no licence number to give. There is no automatic government check: the approver reads your documents and checks them against the paper record. Your documents and any scans you upload are visible only to the person who approves you — never to the public, never to another district.</p>
+  <p class="note">Scans you upload live on this server's disk and are lost if the server is rebuilt — your recorded document details are kept in the account record. A re-upload after a rebuild restores the scan.</p>
+  <div class="row">
+    <label>I am registering as
+      <select id="regRole">
+        <option value="manager">A food manager (under a district head)</option>
+        <option value="head">A district head (District Food Controller / district rate-admin)</option>
+      </select>
+    </label>
+    <label>Username <input id="regUser" placeholder="e.g. lahore-mgr-1"></label>
+    <label>Password (min 8 chars) <input id="regPass" type="password"></label>
+  </div>
+  <div class="row">
+    <label>Your name <input id="regName" placeholder="e.g. Usman Tariq"></label>
+    <label>Designation / government post <input id="regDesig" placeholder="e.g. Market Committee Secretary"></label>
+    <label>District <select id="regDistrict"></select></label>
+  </div>
+  <h3>Appointment documents</h3>
+  <p class="note">At least one document is required. Add up to 5. A CNIC number must be exactly 13 digits. Dates cannot be in the future, and an expiry date cannot be before its issue date.</p>
+  <div id="docsBox"></div>
+  <div class="row">
+    <button id="addDocBtn" type="button">+ Add another document</button>
+  </div>
+  <div class="row">
+    <button id="regBtn">Submit registration</button>
+  </div>
+  <div id="regMsg" class="result" style="display:none"></div>
+  <div id="scanBox" style="display:none">
+    <h3>Upload a scan (optional, after registration)</h3>
+    <p class="note">You can attach a scan of one of your documents — an image (JPG, PNG, WebP) or a PDF, max 5MB. Scans can only be added while your account is still pending. Only your approver can view a scan.</p>
+    <div class="row">
+      <label>Document <select id="scanDoc"></select></label>
+      <label>Scan file <input id="scanFile" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf"></label>
+      <button id="scanBtn">Upload scan</button>
+    </div>
+    <div id="scanMsg" class="result" style="display:none"></div>
+  </div>
+  <p class="note">Already approved? <a href="district-admin.html">District head login</a> · <a href="manager.html">Manager login</a></p>
+</section>
+<script src="register.js"></script>
+</body>
+</html>

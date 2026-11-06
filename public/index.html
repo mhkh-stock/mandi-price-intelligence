@@ -13,14 +13,18 @@
     <a href="#today">Today's Rates</a>
     <a href="#movers">Movers</a>
     <a href="#checker">Overcharge Checker</a>
+    <a href="#chat">Rate Chat</a>
     <a href="#allDistricts">All Districts</a>
     <a href="admin.html">Admin</a>
+    <a href="district-admin.html">District Admin</a>
+    <a href="manager.html">Manager</a>
+    <a href="register.html">Register</a>
   </nav>
 </header>
 
 <section class="hero">
   <h1>Aaj mandi mein kya bhao hai?</h1>
-  <p>Real wholesale rates from AMIS, official retail from the Commissioner Karachi list, and a dated Peshawar retail survey — across all 170 districts of Pakistan. Pick a province first, then its district. History, trends and an overcharge checker. No estimates: every rate shows its source and date.</p>
+  <p>Real wholesale rates from AMIS, official retail from the Commissioner Karachi list, and a dated Peshawar retail survey — across all 168 districts of Pakistan. Pick a province first, then its district. History, trends and an overcharge checker. No estimates: every rate shows its source and date.</p>
   <div class="hero-controls">
     <label>Province
       <select id="provSelect"></select>
@@ -28,8 +32,17 @@
     <label>District
       <select id="citySelect"></select>
     </label>
+    <label>Category
+      <select id="catSelect">
+        <option value="">All — سبزیاں، پھل، دیگر</option>
+        <option value="vegetables">Vegetables — سبزیاں</option>
+        <option value="fruits">Fruits — پھل</option>
+        <option value="other">Other — دیگر</option>
+      </select>
+    </label>
     <span id="dateBadge" class="badge"></span>
   </div>
+  <p id="freshnessLine" class="note"></p>
   <div class="hero-controls" id="provinceChips"></div>
 </section>
 
@@ -49,13 +62,31 @@
 
 <section id="today" class="section">
   <h2>Today's rates — <span id="todayCity"></span></h2>
-  <p class="note">Wholesale is shown per kg (per dozen for banana, as published by AMIS). Official retail appears where an official list exists — Karachi — and Peshawar shows its dated press survey; other districts show wholesale only, or nothing yet until a snapshot is added. A ⚠️ flag means the day's jump is 40% or more: unusual, verify before acting on it.</p>
+  <p id="officialLine" class="note"></p>
+  <p id="nearestNote" class="note"></p>
+  <p class="note">Pick a category to see only vegetables (سبزیاں), only fruits (پھل), or other items. Wholesale is shown per kg (کلو) — per dozen (درجن) for banana, as published by AMIS. Official retail appears where an official list exists — Karachi — and Peshawar shows its dated press survey; other districts show wholesale only, or nothing yet until a snapshot is added. If a district has no published rates yet, the page shows its province hub's latest rates instead, clearly labelled as nearest rates — never as the district's own. A ⚠️ flag means the day's jump is 40% or more: unusual, verify before acting on it.</p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Item</th><th>Wholesale / unit</th><th>Official retail (bazaar)</th><th>Change vs yesterday</th><th>Note</th></tr></thead>
+      <thead><tr><th>Item</th><th>Wholesale / unit (کلو / درجن)</th><th>Official retail (bazaar)</th><th>Change vs yesterday</th><th>Note</th></tr></thead>
       <tbody id="ratesBody"></tbody>
     </table>
   </div>
+</section>
+
+<section class="section" id="photos">
+  <h2>Official rates page — <span id="photosCity"></span></h2>
+  <p class="note">The official rates page published by the government side for this district (Market Committee / District Food Controller daily rate list), photographed by the district's food manager and approved by its district head. Only approved photos appear here.</p>
+  <div id="photosBox"></div>
+</section>
+
+<section class="section" id="chat">
+  <h2>Rate chat — ریٹ پوچھیں</h2>
+  <p class="note">Ask in plain words, in English or Urdu — “tomato rate in Lahore?” or “پیاز کا ریٹ نوشہرہ میں؟” The answer comes only from the rates on file, with the date and source shown. If no rate is on file, it says so plainly — it never guesses a price. Available any time, no sign-up.</p>
+  <div class="row">
+    <input id="chatQ" type="text" placeholder="e.g. tomato rate in Peshawar? / ٹماٹر کا ریٹ پشاور میں؟" style="flex:1;min-width:260px">
+    <button id="chatBtn">Ask</button>
+  </div>
+  <div id="chatAnswer" class="result"></div>
 </section>
 
 <section class="section">
@@ -95,13 +126,21 @@
 
 <section class="section" id="allDistricts">
   <h2>All districts — Pakistan</h2>
-  <p class="note">Every district of every province and territory is listed — 170 districts in total, plus Karachi's retail list. Districts marked “soon” have no rates yet — they show honestly as empty until a daily snapshot is added. Tap any district to view it.</p>
+  <p class="note">Every district of every province and territory is listed — 168 districts in total, plus Karachi's retail list. Districts marked “soon” have no rates yet — opening one shows its province hub's latest rates instead, clearly labelled as nearest rates, until a daily snapshot is added. Tap any district to view it.</p>
   <div id="districts"></div>
+</section>
+
+<section class="section" id="about">
+  <h2>About Mandi Price Intelligence — اس ویب سائٹ کے بارے میں</h2>
+  <p><strong>What it is:</strong> a public website that collects Pakistan's daily mandi (wholesale) and official retail rates for vegetables, fruit and chicken — for all 168 districts — and shows them in one simple table, with every rate's source and date. No estimates, no invented rates: a district with no published rate yet shows that plainly, or its province hub's latest rates, clearly labelled as nearest rates.</p>
+  <p><strong>How it works:</strong> 1) Pick your province, then your district. 2) Pick vegetables, fruit, or other. 3) Read the table — rates in Urdu units (کلو / درجن), with the date and source on every row. You can also ask the rate chat in English or Urdu, compare the cheapest city, check whether a shopkeeper overcharged you, or see the price trend.</p>
+  <p><strong>Where the rates come from:</strong> AMIS Pakistan (the government's daily wholesale changes and its wholesale price database), the Commissioner Karachi official retail list, the Business Recorder Peshawar survey, PBS weekly averages, the Daily Qudrat Islamabad list, and poultryrates.today — plus rates entered by each district's own rate-admin (a government officer or the local person running that district's rates), each labelled with its source and date. The morning search of district market committees' official pages is checked by a person and approved by an admin before anything shows — the site never guesses a price.</p>
+  <p><strong>Who runs it:</strong> M. Hashir — for corrections, a missing district, or a district-admin account, write to <a href="mailto:mhkh3200@gmail.com">mhkh3200@gmail.com</a>. This is a public information service, not a government website: the rates shown are the published rates of the sources named, and anyone can verify them from the source and date shown.</p>
 </section>
 
 <footer>
   <p><strong>Sources:</strong> <span id="sources"></span></p>
-  <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes. Retail: Commissioner Karachi official list, plus the Business Recorder Peshawar survey (2 Nov 2026). If a rate looks wrong, the source and date above let you verify it.</p>
+  <p>Prices are published rates, not our own survey. Wholesale: AMIS Pakistan daily changes and the AMIS ViewPrices database (potato, 05 Nov 2026). Retail: Commissioner Karachi official list, the Business Recorder Peshawar survey (2 Nov 2026), PBS weekly SPI averages (week ended 22 Oct 2026, labelled weekly), the Daily Qudrat Islamabad list (29 Oct 2026), and poultryrates.today chicken (05 Nov 2026). If a rate looks wrong, the source and date above let you verify it.</p>
   <p><a href="api.html">Public live API</a> — every rate on this site is also available as free JSON, no key needed.</p>
 </footer>
 

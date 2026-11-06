@@ -1,140 +1,173 @@
 {
-  "collected": "2026-11-04",
+  "collected": "2026-11-06",
   "items": [
     {
       "en": "Tomato",
       "unit": "kg",
-      "ur": "ٹماٹر"
+      "ur": "ٹماٹر",
+      "category": "vegetables"
     },
     {
       "en": "Onion",
       "unit": "kg",
-      "ur": "پیاز"
+      "ur": "پیاز",
+      "category": "vegetables"
     },
     {
       "en": "Potato",
       "unit": "kg",
-      "ur": "آلو"
+      "ur": "آلو",
+      "category": "vegetables"
     },
     {
       "en": "Cauliflower",
       "unit": "kg",
-      "ur": "پھول گوبھی"
+      "ur": "پھول گوبھی",
+      "category": "vegetables"
     },
     {
       "en": "Brinjal",
       "unit": "kg",
-      "ur": "بینگن"
+      "ur": "بینگن",
+      "category": "vegetables"
     },
     {
       "en": "Okra",
       "unit": "kg",
-      "ur": "بھنڈی"
+      "ur": "بھنڈی",
+      "category": "vegetables"
     },
     {
       "en": "Carrot",
       "unit": "kg",
-      "ur": "گاجر"
+      "ur": "گاجر",
+      "category": "vegetables"
     },
     {
       "en": "Cabbage",
       "unit": "kg",
-      "ur": "بند گوبھی"
+      "ur": "بند گوبھی",
+      "category": "vegetables"
     },
     {
       "en": "Cucumber",
       "unit": "kg",
-      "ur": "کھیرا"
+      "ur": "کھیرا",
+      "category": "vegetables"
     },
     {
       "en": "Spinach",
       "unit": "kg",
-      "ur": "پالک"
+      "ur": "پالک",
+      "category": "vegetables"
     },
     {
       "en": "Radish",
       "unit": "kg",
-      "ur": "مولی"
+      "ur": "مولی",
+      "category": "vegetables"
     },
     {
       "en": "Turnip",
       "unit": "kg",
-      "ur": "شلجم"
+      "ur": "شلجم",
+      "category": "vegetables"
     },
     {
       "en": "Ginger",
       "unit": "kg",
-      "ur": "ادرک"
+      "ur": "ادرک",
+      "category": "vegetables"
     },
     {
       "en": "Garlic",
       "unit": "kg",
-      "ur": "لہسن"
+      "ur": "لہسن",
+      "category": "vegetables"
     },
     {
       "en": "Green Chilli",
       "unit": "kg",
-      "ur": "سبز مرچ"
+      "ur": "سبز مرچ",
+      "category": "vegetables"
     },
     {
       "en": "Capsicum",
       "unit": "kg",
-      "ur": "شملہ مرچ"
+      "ur": "شملہ مرچ",
+      "category": "vegetables"
     },
     {
       "en": "Lemon",
       "unit": "kg",
-      "ur": "لیموں"
+      "ur": "لیموں",
+      "category": "vegetables"
     },
     {
       "en": "Banana",
       "unit": "dozen",
-      "ur": "کیلا"
+      "ur": "کیلا",
+      "category": "fruits"
     },
     {
       "en": "Pomegranate",
       "unit": "kg",
-      "ur": "انار"
+      "ur": "انار",
+      "category": "fruits"
     },
     {
       "en": "Pear",
       "unit": "kg",
-      "ur": "ناشپاتی"
+      "ur": "ناشپاتی",
+      "category": "fruits"
     },
     {
       "en": "Melon",
       "unit": "kg",
-      "ur": "خربوزہ"
+      "ur": "خربوزہ",
+      "category": "fruits"
     },
     {
       "en": "Sweet Potato",
       "unit": "kg",
-      "ur": "شکر قندی"
+      "ur": "شکر قندی",
+      "category": "vegetables"
     },
     {
       "en": "Peas",
       "unit": "kg",
-      "ur": "مٹر"
+      "ur": "مٹر",
+      "category": "vegetables"
     },
     {
       "en": "Cocoyam",
       "unit": "kg",
-      "ur": "اروی"
+      "ur": "اروی",
+      "category": "vegetables"
     },
     {
       "en": "Bottle Gourd",
       "unit": "kg",
-      "ur": "لوکی"
+      "ur": "لوکی",
+      "category": "vegetables"
     },
     {
       "en": "Tinda",
       "unit": "kg",
-      "ur": "ٹینڈا"
+      "ur": "ٹینڈا",
+      "category": "vegetables"
     },
     {
       "en": "Green Onion",
       "unit": "kg",
-      "ur": "ہری پیاز"
+      "ur": "ہری پیاز",
+      "category": "vegetables"
+    },
+    {
+      "en": "Chicken",
+      "unit": "kg",
+      "ur": "چکن",
+      "category": "other"
     }
   ],
   "retail_karachi_2026_11_04": [
@@ -248,7 +281,7 @@
     {
       "id": "amis",
       "name": "AMIS Pakistan — Daily Wholesale Price Commodity Change",
-      "note": "Wholesale prices in Rs/100kg (per dozen for banana). Today = 2026-11-04, Yesterday = 2026-11-03 as published on the page.",
+      "note": "Wholesale prices in Rs/100kg (per dozen for banana). Each wholesale row carries its own date (the date of its \"today\" value): refreshed 2026-11-06 for the 6 cities AMIS published that day (Lahore, Rawalpindi, Okara, Sahiwal, Layyah, Rahim Yar Khan); the other 5 cities keep their real 2026-11-04 values because AMIS published nothing for them on 2026-11-06 — never invented, never re-dated.",
       "url": "http://www.amis.pk/daily market changes.aspx"
     },
     {
@@ -262,6 +295,30 @@
       "name": "Business Recorder Peshawar retail market survey",
       "note": "Retail survey published 2026-11-02 (not an official rate list). Green Chilli and Banana were printed as ranges (Rs 100-150); the app stores the midpoint Rs 125 and says so.",
       "url": "https://www.brecorder.com/news/40446963"
+    },
+    {
+      "id": "amis-viewprices",
+      "name": "AMIS Pakistan — wholesale price database (ViewPrices.aspx)",
+      "note": "Wholesale Min/Max/FQP in Rs/100kg, dated 05-11-2026. FQP is stored as the rate; the Min–Max range is recorded in each row's source. Two flagged outliers (Kot Adu, Sarialamgir) were NOT seeded.",
+      "url": "http://www.amis.pk/ViewPrices.aspx?searchType=0&commodityId=21"
+    },
+    {
+      "id": "pbs-spi",
+      "name": "Pakistan Bureau of Statistics — Sensitive Price Indicator (weekly)",
+      "note": "Weekly RETAIL averages from sample markets, week ended 22 Oct 2026. Not daily rates, not wholesale.",
+      "url": "https://pakera.pk/tomato-onion-price-pakistan-22-october-2026/"
+    },
+    {
+      "id": "daily-qudrat",
+      "name": "Daily Qudrat — Islamabad fruit & vegetable prices",
+      "note": "Islamabad retail list dated 29 Oct 2026, per kg.",
+      "url": "https://en.dailyqudrat.pk/109545/"
+    },
+    {
+      "id": "poultryrates",
+      "name": "poultryrates.today — KP Market Committee notified chicken rates",
+      "note": "Retail live chicken, dated 05 Nov 2026, per kg. Mansehra + Abbottabad only; other cities not verified.",
+      "url": "https://poultryrates.today/mansehra-poultry-rates/"
     }
   ],
   "wholesale": [
@@ -678,6 +735,399 @@
       "item": "Carrot",
       "today": 6317,
       "yesterday": 6535
+    },
+    {
+      "city": "Lahore",
+      "item": "Bottle Gourd",
+      "date": "2026-11-06",
+      "today": 13850,
+      "yesterday": 13000,
+      "variant": "کدو"
+    },
+    {
+      "city": "Lahore",
+      "item": "Capsicum",
+      "date": "2026-11-06",
+      "today": 19500,
+      "yesterday": 18550,
+      "variant": "شملہ مرچ"
+    },
+    {
+      "city": "Lahore",
+      "item": "Green Chilli",
+      "date": "2026-11-06",
+      "today": 10250,
+      "yesterday": 11150
+    },
+    {
+      "city": "Lahore",
+      "item": "Lemon",
+      "date": "2026-11-06",
+      "today": 5750,
+      "yesterday": 6250,
+      "variant": "China"
+    },
+    {
+      "city": "Lahore",
+      "item": "Peas",
+      "date": "2026-11-06",
+      "today": 29750,
+      "yesterday": 30750
+    },
+    {
+      "city": "Lahore",
+      "item": "Pomegranate",
+      "date": "2026-11-06",
+      "today": 56850,
+      "yesterday": 55850,
+      "variant": "Kandhari"
+    },
+    {
+      "city": "Lahore",
+      "item": "Tomato",
+      "date": "2026-11-06",
+      "today": 17500,
+      "yesterday": 16000
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Brinjal",
+      "date": "2026-11-06",
+      "today": 7050,
+      "yesterday": 7500
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Capsicum",
+      "date": "2026-11-06",
+      "today": 17750,
+      "yesterday": 16850,
+      "variant": "شملہ مرچ"
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Cocoyam",
+      "date": "2026-11-06",
+      "today": 10000,
+      "yesterday": 9550,
+      "variant": "اروی"
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Garlic",
+      "date": "2026-11-06",
+      "today": 21700,
+      "yesterday": 21250,
+      "variant": "Local"
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Onion",
+      "date": "2026-11-06",
+      "today": 16850,
+      "yesterday": 17250
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Peas",
+      "date": "2026-11-06",
+      "today": 30950,
+      "yesterday": 30450
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Pomegranate",
+      "date": "2026-11-06",
+      "today": 53400,
+      "yesterday": 52950,
+      "variant": "Kandhari"
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Spinach",
+      "date": "2026-11-06",
+      "today": 3850,
+      "yesterday": 4300
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Tinda",
+      "date": "2026-11-06",
+      "today": 13650,
+      "yesterday": 14050,
+      "variant": "Desi"
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Tomato",
+      "date": "2026-11-06",
+      "today": 16850,
+      "yesterday": 15450
+    },
+    {
+      "city": "Rawalpindi",
+      "item": "Turnip",
+      "date": "2026-11-06",
+      "today": 8850,
+      "yesterday": 9550
+    },
+    {
+      "city": "Okara",
+      "item": "Bottle Gourd",
+      "date": "2026-11-06",
+      "today": 5750,
+      "yesterday": 5250,
+      "variant": "کدو"
+    },
+    {
+      "city": "Okara",
+      "item": "Brinjal",
+      "date": "2026-11-06",
+      "today": 2350,
+      "yesterday": 2250
+    },
+    {
+      "city": "Okara",
+      "item": "Capsicum",
+      "date": "2026-11-06",
+      "today": 15750,
+      "yesterday": 13750,
+      "variant": "شملہ مرچ"
+    },
+    {
+      "city": "Okara",
+      "item": "Carrot",
+      "date": "2026-11-06",
+      "today": 4750,
+      "yesterday": 5250
+    },
+    {
+      "city": "Okara",
+      "item": "Cauliflower",
+      "date": "2026-11-06",
+      "today": 5250,
+      "yesterday": 5750
+    },
+    {
+      "city": "Okara",
+      "item": "Garlic",
+      "date": "2026-11-06",
+      "today": 29750,
+      "yesterday": 39750,
+      "variant": "China"
+    },
+    {
+      "city": "Okara",
+      "item": "Peas",
+      "date": "2026-11-06",
+      "today": 27750,
+      "yesterday": 29750
+    },
+    {
+      "city": "Okara",
+      "item": "Potato",
+      "date": "2026-11-06",
+      "today": 2350,
+      "yesterday": 2250,
+      "variant": "Sugar free"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Banana",
+      "date": "2026-11-06",
+      "today": 80,
+      "yesterday": 75,
+      "variant": "DOZEN"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Bottle Gourd",
+      "date": "2026-11-06",
+      "today": 6150,
+      "yesterday": 5650,
+      "variant": "کدو"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Brinjal",
+      "date": "2026-11-06",
+      "today": 2350,
+      "yesterday": 2650
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Capsicum",
+      "date": "2026-11-06",
+      "today": 16000,
+      "yesterday": 14000,
+      "variant": "شملہ مرچ"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Carrot",
+      "date": "2026-11-06",
+      "today": 5300,
+      "yesterday": 5650
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Cucumber",
+      "date": "2026-11-06",
+      "today": 4850,
+      "yesterday": 4650,
+      "variant": "Kheera"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Garlic",
+      "date": "2026-11-06",
+      "today": 21850,
+      "yesterday": 21650,
+      "variant": "Local"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Ginger",
+      "date": "2026-11-06",
+      "today": 29900,
+      "yesterday": 29650,
+      "variant": "China"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Ginger",
+      "date": "2026-11-06",
+      "today": 32700,
+      "yesterday": 32650,
+      "variant": "Thai"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Okra",
+      "date": "2026-11-06",
+      "today": 10750,
+      "yesterday": 9650,
+      "variant": "Lady Finger"
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Peas",
+      "date": "2026-11-06",
+      "today": 27850,
+      "yesterday": 29875
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Radish",
+      "date": "2026-11-06",
+      "today": 2900,
+      "yesterday": 3000
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Tomato",
+      "date": "2026-11-06",
+      "today": 14850,
+      "yesterday": 15000
+    },
+    {
+      "city": "Sahiwal",
+      "item": "Turnip",
+      "date": "2026-11-06",
+      "today": 6850,
+      "yesterday": 8850
+    },
+    {
+      "city": "Layyah",
+      "item": "Potato",
+      "date": "2026-11-06",
+      "today": 12500,
+      "yesterday": 13400,
+      "variant": "Fresh"
+    },
+    {
+      "city": "Layyah",
+      "item": "Tomato",
+      "date": "2026-11-06",
+      "today": 15400,
+      "yesterday": 12400
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Capsicum",
+      "date": "2026-11-06",
+      "today": 12634,
+      "yesterday": 13506,
+      "variant": "شملہ مرچ"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Cauliflower",
+      "date": "2026-11-06",
+      "today": 8649,
+      "yesterday": 8278
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Cucumber",
+      "date": "2026-11-06",
+      "today": 4575,
+      "yesterday": 4793,
+      "variant": "Kheera"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Garlic",
+      "date": "2026-11-06",
+      "today": 17273,
+      "yesterday": 16819,
+      "variant": "Local"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Ginger",
+      "date": "2026-11-06",
+      "today": 26821,
+      "yesterday": 28637,
+      "variant": "Thai"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Lemon",
+      "date": "2026-11-06",
+      "today": 5000,
+      "yesterday": 5682,
+      "variant": "China"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Okra",
+      "date": "2026-11-06",
+      "today": 9149,
+      "yesterday": 8278,
+      "variant": "Lady Finger"
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Onion",
+      "date": "2026-11-06",
+      "today": 13182,
+      "yesterday": 12273
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Peas",
+      "date": "2026-11-06",
+      "today": 27882,
+      "yesterday": 29625
+    },
+    {
+      "city": "Rahim Yar Khan",
+      "item": "Sweet Potato",
+      "date": "2026-11-06",
+      "today": 9585,
+      "yesterday": 9149,
+      "variant": "شکر قندی"
     }
   ],
   "provinces": {
@@ -728,7 +1178,6 @@
       "Abbottabad",
       "Bajaur",
       "Bannu",
-      "Bari Swat",
       "Batagram",
       "Buner",
       "Charsadda",
@@ -751,7 +1200,6 @@
       "North Waziristan",
       "Nowshera",
       "Orakzai",
-      "Paharpur",
       "Peshawar",
       "Shangla",
       "South Waziristan Lower",
@@ -920,6 +1368,360 @@
     {
       "item": "Banana",
       "bazaar": 125
+    }
+  ],
+  "wholesale_viewprices_2026_11_05": [
+    {
+      "market": "Vehari",
+      "district": "Vehari",
+      "item": "Potato",
+      "min": 9600,
+      "max": 13000,
+      "fqp": 11300
+    },
+    {
+      "market": "Layyah",
+      "district": "Layyah",
+      "item": "Potato",
+      "min": 13000,
+      "max": 13800,
+      "fqp": 13400
+    },
+    {
+      "market": "Toba Tek Singh",
+      "district": "Toba Tek Singh",
+      "item": "Potato",
+      "min": 10800,
+      "max": 12000,
+      "fqp": 11400
+    },
+    {
+      "market": "Kabirwala",
+      "district": "Khanewal",
+      "item": "Potato",
+      "min": 10000,
+      "max": 13000,
+      "fqp": 11500
+    },
+    {
+      "market": "Arifwala",
+      "district": "Pakpattan",
+      "item": "Potato",
+      "min": 11000,
+      "max": 12500,
+      "fqp": 11750
+    },
+    {
+      "market": "Pakpattan",
+      "district": "Pakpattan",
+      "item": "Potato",
+      "min": 10900,
+      "max": 12700,
+      "fqp": 11800
+    },
+    {
+      "market": "Lodhran",
+      "district": "Lodhran",
+      "item": "Potato",
+      "min": 8200,
+      "max": 11500,
+      "fqp": 9850
+    },
+    {
+      "market": "Mailsi",
+      "district": "Vehari",
+      "item": "Potato",
+      "min": 9600,
+      "max": 13000,
+      "fqp": 11300
+    },
+    {
+      "market": "Kahrorpacca",
+      "district": "Lodhran",
+      "item": "Potato",
+      "min": 11500,
+      "max": 11500,
+      "fqp": 11500
+    },
+    {
+      "market": "Dunyapur",
+      "district": "Lodhran",
+      "item": "Potato",
+      "min": 12000,
+      "max": 12250,
+      "fqp": 12125
+    },
+    {
+      "market": "D.G. Khan",
+      "district": "Dera Ghazi Khan",
+      "item": "Potato",
+      "min": 12000,
+      "max": 13000,
+      "fqp": 12500
+    },
+    {
+      "market": "Kamalia",
+      "district": "Toba Tek Singh",
+      "item": "Potato",
+      "min": 12000,
+      "max": 12400,
+      "fqp": 12200
+    },
+    {
+      "market": "Jahanian",
+      "district": "Khanewal",
+      "item": "Potato",
+      "min": 9000,
+      "max": 12000,
+      "fqp": 10500
+    },
+    {
+      "market": "Jampur",
+      "district": "Rajanpur",
+      "item": "Potato",
+      "min": 11000,
+      "max": 12000,
+      "fqp": 11500
+    },
+    {
+      "market": "Jhelum",
+      "district": "Jhelum",
+      "item": "Potato",
+      "min": 11700,
+      "max": 12600,
+      "fqp": 12150
+    },
+    {
+      "market": "Mianwali",
+      "district": "Mianwali",
+      "item": "Potato",
+      "min": 12600,
+      "max": 13500,
+      "fqp": 13050
+    },
+    {
+      "market": "Rajanpur",
+      "district": "Rajanpur",
+      "item": "Potato",
+      "min": 11000,
+      "max": 12000,
+      "fqp": 11500
+    },
+    {
+      "market": "Talagang",
+      "district": "Chakwal",
+      "item": "Potato",
+      "min": 13400,
+      "max": 13600,
+      "fqp": 13500
+    },
+    {
+      "market": "Abdulhakim",
+      "district": "Khanewal",
+      "item": "Potato",
+      "min": 11600,
+      "max": 11700,
+      "fqp": 11650
+    },
+    {
+      "market": "Hafizabad",
+      "district": "Hafizabad",
+      "item": "Potato",
+      "min": 9500,
+      "max": 10000,
+      "fqp": 9750
+    },
+    {
+      "market": "Pinanwal",
+      "district": "Jhelum",
+      "item": "Potato",
+      "min": 11700,
+      "max": 12600,
+      "fqp": 12150
+    },
+    {
+      "market": "Jauharabad",
+      "district": "Khushab",
+      "item": "Potato",
+      "min": 10900,
+      "max": 10900,
+      "fqp": 10900
+    },
+    {
+      "market": "Taunsa Sharif",
+      "district": "Dera Ghazi Khan",
+      "item": "Potato",
+      "min": 11500,
+      "max": 12000,
+      "fqp": 11750
+    }
+  ],
+  "retail_pbs_spi_2026_10_22": [
+    {
+      "district": "Bannu",
+      "item": "Tomato",
+      "retail_bazaar": 89.63
+    },
+    {
+      "district": "Bannu",
+      "item": "Onion",
+      "retail_bazaar": 180
+    },
+    {
+      "district": "Sialkot",
+      "item": "Tomato",
+      "retail_bazaar": 100
+    },
+    {
+      "district": "Sialkot",
+      "item": "Onion",
+      "retail_bazaar": 200
+    },
+    {
+      "district": "Bahawalpur",
+      "item": "Tomato",
+      "retail_bazaar": 78.3
+    },
+    {
+      "district": "Bahawalpur",
+      "item": "Onion",
+      "retail_bazaar": 193.1
+    },
+    {
+      "district": "Bahawalpur",
+      "item": "Potato",
+      "retail_bazaar": 33.02
+    },
+    {
+      "district": "Hyderabad",
+      "item": "Tomato",
+      "retail_bazaar": 53.13
+    },
+    {
+      "district": "Hyderabad",
+      "item": "Onion",
+      "retail_bazaar": 189.74
+    },
+    {
+      "district": "Hyderabad",
+      "item": "Garlic",
+      "retail_bazaar": 289.83
+    },
+    {
+      "district": "Sukkur",
+      "item": "Tomato",
+      "retail_bazaar": 50
+    },
+    {
+      "district": "Sukkur",
+      "item": "Onion",
+      "retail_bazaar": 154.92
+    },
+    {
+      "district": "Larkana",
+      "item": "Tomato",
+      "retail_bazaar": 73.19
+    },
+    {
+      "district": "Larkana",
+      "item": "Onion",
+      "retail_bazaar": 163.27
+    },
+    {
+      "district": "Larkana",
+      "item": "Potato",
+      "retail_bazaar": 31.58
+    },
+    {
+      "district": "Quetta",
+      "item": "Tomato",
+      "retail_bazaar": 94.51
+    },
+    {
+      "district": "Quetta",
+      "item": "Onion",
+      "retail_bazaar": 144.68
+    },
+    {
+      "district": "Khuzdar",
+      "item": "Tomato",
+      "retail_bazaar": 78.3
+    },
+    {
+      "district": "Khuzdar",
+      "item": "Onion",
+      "retail_bazaar": 165.1
+    },
+    {
+      "district": "Khuzdar",
+      "item": "Garlic",
+      "retail_bazaar": 600
+    },
+    {
+      "district": "Islamabad",
+      "item": "Tomato",
+      "retail_bazaar": 167.43
+    },
+    {
+      "district": "Islamabad",
+      "item": "Onion",
+      "retail_bazaar": 234.17
+    },
+    {
+      "district": "Islamabad",
+      "item": "Potato",
+      "retail_bazaar": 72.62
+    },
+    {
+      "district": "Islamabad",
+      "item": "Garlic",
+      "retail_bazaar": 498.17
+    }
+  ],
+  "retail_islamabad_qudrat_2026_10_29": [
+    {
+      "item": "Capsicum",
+      "retail_bazaar": 150
+    },
+    {
+      "item": "Onion",
+      "retail_bazaar": 195
+    },
+    {
+      "item": "Tinda",
+      "retail_bazaar": 160
+    },
+    {
+      "item": "Garlic",
+      "retail_bazaar": 230
+    },
+    {
+      "item": "Cucumber",
+      "retail_bazaar": 80
+    },
+    {
+      "item": "Okra",
+      "retail_bazaar": 160
+    },
+    {
+      "item": "Lemon",
+      "retail_bazaar": 75
+    },
+    {
+      "item": "Ginger",
+      "retail_bazaar": 375
+    }
+  ],
+  "retail_chicken_2026_11_05": [
+    {
+      "district": "Mansehra",
+      "item": "Chicken",
+      "retail_bazaar": 415
+    },
+    {
+      "district": "Abbottabad",
+      "item": "Chicken",
+      "retail_bazaar": 415
     }
   ]
 }

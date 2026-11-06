@@ -21,6 +21,15 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function pktTodayStr() {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 }
+// Whole days between an ISO date and today (PKT); ISO date n days before today.
+function daysAgo(iso) {
+  return Math.round((Date.parse(pktTodayStr() + 'T12:00:00Z') - Date.parse(iso + 'T12:00:00Z')) / 86400000);
+}
+function daysBeforeStr(n) {
+  const d = new Date(pktTodayStr() + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
 const jFor = (port) => async (p, opts) => (await (await fetch(`http://127.0.0.1:${port}` + p, opts)).json());
 const j = jFor(PORT);
 async function waitReady(port) {
@@ -53,7 +62,18 @@ async function waitReady(port) {
     const pTom = psh.rows.find((r) => r.item === 'Tomato');
     check('Peshawar tomato retail 100 (Business Recorder 2026-11-02)', psh.date === '2026-11-02' && pTom && pTom.retail_bazaar === 100, psh);
     const nows = await j('/api/today?city=Nowshera');
-    check('Nowshera honestly empty (no rates invented; stale hub gives no fallback)', nows.date === null && nows.rows.length === 0 && nows.nearest_rates_from === null && nows.nearest_rates_date === null, nows);
+    // Peshawar's seed rates are dated 2026-11-02: while they are within the
+    // 7-day window the fallback shows them date-labelled; once they age past
+    // 7 days the district is honestly empty again. The expectation follows
+    // the calendar, so this check stays true on any run date.
+    const pshAge = daysAgo('2026-11-02');
+    if (pshAge <= 7) {
+      check('Nowshera shows Peshawar 2 Nov rates, date-labelled (7-day window)',
+        nows.date === '2026-11-02' && nows.rows.length > 0 && nows.nearest_rates_from === 'Peshawar' && nows.nearest_rates_date === '2026-11-02', nows);
+    } else {
+      check('Nowshera honestly empty (hub older than 7 days gives no fallback)',
+        nows.date === null && nows.rows.length === 0 && nows.nearest_rates_from === null && nows.nearest_rates_date === null, nows);
+    }
     check('meta has 7 province groups', meta.provinces.length === 7, meta.provinces.map((g) => g.name));
     const totalDistricts = meta.provinces.reduce((a, g) => a + g.districts.length, 0);
     // 168 seeded districts + Karachi, the retail-list city (not a district) = 169 locations.
@@ -204,6 +224,23 @@ async function waitReady(port) {
     check('Skardu honestly empty (hub Gilgit has no rates)', skardu.date === null && skardu.rows.length === 0 && skardu.nearest_rates_from === null && skardu.nearest_rates_date === null, skardu);
     const gilgit = await j('/api/today?city=Gilgit');
     check('Gilgit itself honestly empty', gilgit.date === null && gilgit.rows.length === 0 && gilgit.nearest_rates_from === null, gilgit);
+    // ---- 7-day fallback window (Hashir's order 2026-11-06) ----
+    // Gilgit has no seed rates, so it is the clean stale-hub fixture.
+    // (d) hub 8 days old -> honestly empty, no fallback.
+    const d8 = daysBeforeStr(8);
+    const gil8 = await j('/api/admin/snapshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, city: 'Gilgit', item: 'Tomato', date: d8, wholesale: 14000 }) });
+    check('admin adds Gilgit snapshot 8 days old', gil8.ok === true, gil8);
+    const skardu8 = await j('/api/today?city=Skardu');
+    check('Skardu honestly empty (hub 8 days old is past the 7-day window)', skardu8.date === null && skardu8.rows.length === 0 && skardu8.nearest_rates_from === null && skardu8.nearest_rates_date === null, skardu8);
+    // (e) hub exactly 7 days old -> fallback shows, date-labelled.
+    const d7 = daysBeforeStr(7);
+    const gil7 = await j('/api/admin/snapshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, city: 'Gilgit', item: 'Tomato', date: d7, wholesale: 14500 }) });
+    check('admin adds Gilgit snapshot 7 days old', gil7.ok === true, gil7);
+    const skardu7 = await j('/api/today?city=Skardu');
+    const skTom = skardu7.rows.find((r) => r.item === 'Tomato');
+    check('Skardu falls back to 7-day-old Gilgit rates, date-labelled', skardu7.date === d7 && skardu7.rows.length > 0 && skardu7.nearest_rates_from === 'Gilgit' && skardu7.nearest_rates_date === d7 && skTom && skTom.wholesale_per_unit === 145, skardu7);
+    const mvSkardu = await j('/api/movers?city=Skardu&limit=5');
+    check('movers pass the 7-day fallback label through', mvSkardu.nearest_rates_from === 'Gilgit' && mvSkardu.nearest_rates_date === d7, mvSkardu);
     // UI: the fallback line element exists on the homepage.
     const home3 = await fetch(BASE + '/');
     const home3Html = await home3.text();

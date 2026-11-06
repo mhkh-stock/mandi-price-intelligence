@@ -369,3 +369,5 @@ Still open (not blocking the push):
   and create real district rate-admins (none seeded in production yet).
 
 <!-- Deploy trigger: v3.0 + v3.1 + v3.2-v3.3 live push, 2026-11-06 -->
+
+<!-- nav deploy trigger 2026-11-06 22:15 PKT -->

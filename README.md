@@ -247,10 +247,27 @@ WAL mode. Admin code: `ADMIN_CODE` env is REQUIRED — the app refuses
 to start without it. Set a long random value on your host; never commit
 it to the repo.
 
+Environment variables (full list + deploy settings: `DEPLOY.md`):
+- `ADMIN_CODE` — required, fail-closed, no default.
+- `PORT` — default `3030`.
+- `DB_FILE` — default `data/mandi.sqlite`.
+- `UPLOADS_DIR` — default `uploads/`; set `/tmp/mandi-uploads` on the
+  host (licence scans + rates-page photos live on the container disk
+  and are lost on redeploy).
+- `MANDI_AUTO_REFRESH` — default on; set `0` to disable the daily AMIS
+  refresh (tests do this).
+- `AMIS_URL`, `AMIS_VIEWPRICES_URL` — optional overrides for the two
+  AMIS source pages the refresh fetches.
+- **Writable-directory requirement:** the app writes the SQLite DB and
+  uploads under the app dir. On a host with a read-only app dir both
+  fall back automatically to `/tmp/mandi-price-intelligence`
+  (`lib/writable.js`, same pattern as FoodScope) and the server logs
+  the fallback path; `DB_FILE` / `UPLOADS_DIR` env vars still win.
+
 ## Run
 ```sh
 node server.js          # http://127.0.0.1:3030
-node test.js            # 355 checks on fresh DBs (all must pass)
+node test.js            # 360 checks on fresh DBs (all must pass)
 ```
 
 ## Honest limits

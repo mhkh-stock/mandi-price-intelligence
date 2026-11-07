@@ -14,13 +14,21 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { DatabaseSync } = require('node:sqlite');
 const { parseAmisHtml, mapCrop } = require('./lib/amis');
+const { writableBase } = require('./lib/writable');
 const {
   parseViewPricesHtml, marketToDistrict, normalizeMarket, guessCategory,
   isOutlier, viewPricesUrl,
 } = require('./lib/viewprices');
 
 const PORT = Number(process.env.PORT || 3030);
-const DB_FILE = process.env.DB_FILE || path.join(__dirname, 'data', 'mandi.sqlite');
+// Deploy-only writable-location fallback (no behaviour change on a normal PC):
+// on a local run __dirname is writable, so the database and uploads stay
+// exactly where they were. Only when the app dir cannot be written (e.g.
+// SnapDeploy's /app) do they move under the OS temp dir. DB_FILE env still
+// wins over both. No API, schema or seed changes.
+const DATA_ROOT = writableBase(__dirname, 'mandi-price-intelligence');
+const DB_FILE = process.env.DB_FILE || path.join(DATA_ROOT, 'data', 'mandi.sqlite');
+if (DATA_ROOT !== __dirname) console.log('Mandi data directory (read-only app dir fallback):', DATA_ROOT);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const ADMIN_CODE = process.env.ADMIN_CODE;
 if (!ADMIN_CODE) { console.error('FATAL: ADMIN_CODE env var is required — set a private code, there is no default.'); process.exit(1); }
@@ -608,6 +616,25 @@ function recordLoginFail(username) {
 function clearLoginFails(username) {
   LOGIN_ATTEMPTS.delete(username);
 }
+// ---- abuse guard: per-IP rate limit on registration + admin mutations ----
+// Login keeps its own stricter 5-fail/15-min per-username lockout above.
+// This is a coarser flood guard (100 POSTs per IP per minute, per bucket)
+// so one client cannot hammer /api/register/* or /api/admin/* — it is not
+// the security boundary: the admin code and the lockout remain the real
+// gates. In-memory only; a restart resets the buckets.
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 100;
+const RATE_LIMITS = new Map(); // bucket -> Map(ip -> { count, resetAt })
+function rateLimited(bucket, req) {
+  const ip = (req.socket && req.socket.remoteAddress) || 'unknown';
+  let b = RATE_LIMITS.get(bucket);
+  if (!b) { b = new Map(); RATE_LIMITS.set(bucket, b); }
+  const now = Date.now();
+  let rec = b.get(ip);
+  if (!rec || now >= rec.resetAt) { rec = { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS }; b.set(ip, rec); }
+  rec.count += 1;
+  return rec.count > RATE_LIMIT_MAX;
+}
 function districtAdminFromToken(token) {
   if (!token) return null;
   const row = db.prepare('SELECT username, district, expires_at FROM district_admin_sessions WHERE token=?').get(token);
@@ -692,7 +719,7 @@ function isValidRateDate(s) {
 // those REAL documents — structured, never a free-text licence number.
 // Research: ~/workspace/new-projects/mandi-govt-roles-research.md
 const DOC_TYPES = ['Appointment Letter', 'Posting-Transfer Order', 'Service Card', 'Market Committee Authorisation', 'CNIC', 'Other'];
-const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
+const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(DATA_ROOT, 'uploads');
 try { fs.mkdirSync(UPLOADS_DIR, { recursive: true }); } catch (e) { console.error('uploads dir unavailable:', e.message); }
 function validDateStr(s) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(s || ''))) return false;
@@ -1140,6 +1167,12 @@ const server = http.createServer(async (req, res) => {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🥬</text></svg>`;
       res.writeHead(200, { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Content-Length': Buffer.byteLength(svg) });
       return res.end(svg);
+    }
+    // Abuse guard (see rateLimited): registration + admin mutations only.
+    // Public reads, the health check and login (own lockout) are untouched.
+    if (req.method === 'POST' && (p.startsWith('/api/register/') || p.startsWith('/api/admin/'))) {
+      const bucket = p.startsWith('/api/register/') ? 'register' : 'admin';
+      if (rateLimited(bucket, req)) return sendJson(res, 429, { error: 'too many requests — try again in a minute' });
     }
     if (p === '/api/meta' && req.method === 'GET') {
       const seed = JSON.parse(fs.readFileSync(path.join(__dirname, 'seed-data.json'), 'utf8'));

@@ -6,6 +6,8 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const { parseAmisHtml, mapCrop } = require('./lib/amis');
+const os = require('node:os');
+const { writableBase } = require('./lib/writable');
 
 const PORT = 3040;
 const DB = '/tmp/mandi-test.sqlite';
@@ -49,6 +51,13 @@ async function waitReady(port) {
   child.stderr.on('data', (d) => { serverLog += d; });
   try {
     check('server starts', await waitReady(PORT), serverLog.slice(-500));
+    // Writable-dir fallback helper (lib/writable.js, FoodScope pattern):
+    // a writable dir is kept as-is; an unwritable one (here /proc, which
+    // is read-only even for root, so the check is deterministic) falls
+    // back to the same-named directory under the OS temp dir.
+    check('writableBase keeps a writable app dir', writableBase(__dirname, 'mandi-test-fallback') === __dirname);
+    check('writableBase falls back to tmp when the dir is not writable',
+      writableBase('/proc/mandi-readonly-test', 'mandi-test-fallback') === path.join(os.tmpdir(), 'mandi-test-fallback'));
     const meta = await j('/api/meta');
     const cityNames = meta.cities.map((c) => c.name);
     check('meta has Lahore + Karachi', cityNames.includes('Lahore') && cityNames.includes('Karachi'), cityNames);
@@ -1155,6 +1164,38 @@ async function waitReady(port) {
       child3.kill();
       badFix.srv.close();
     }
+
+    // ---- rate limiting on register + admin mutations (last: both buckets
+    // trip here, so no register/admin POST may run after this) ----
+    // Hammer-until-429: the suite already made ~40 admin and ~14 register
+    // POSTs, so the trip point depends on the earlier count — assert only
+    // that a 429 appears within the window and that every response before
+    // it was the endpoint's normal answer (403 / 400), never an early 429.
+    async function hammerUntil429(pathSuffix, body, normalStatus) {
+      const seen = [];
+      let trippedAt = -1;
+      for (let i = 0; i < 120; i++) {
+        const r = await fetch(BASE + pathSuffix, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        seen.push(r.status);
+        await r.text();
+        if (r.status === 429) { trippedAt = i; break; }
+      }
+      // Every response before the trip must be the endpoint's normal
+      // answer (403 bad code / 400 bad body) — never an early 429.
+      const earlyOk = seen.slice(0, trippedAt).every((s) => s === normalStatus);
+      return { trippedAt, earlyOk, seenCount: seen.length };
+    }
+    const adminHammer = await hammerUntil429('/api/admin/refresh', { code: 'wrong' }, 403);
+    check('admin mutations rate-limit: 429 appears after sustained POSTs, earlier answers stay 403',
+      adminHammer.trippedAt >= 0 && adminHammer.earlyOk, adminHammer);
+    const regHammer = await hammerUntil429('/api/register/head', {}, 400);
+    check('register rate-limit: 429 appears after sustained POSTs, earlier answers stay 400',
+      regHammer.trippedAt >= 0 && regHammer.earlyOk, regHammer);
+    // The buckets are per-path-prefix: tripping admin must not block a
+    // public read, and tripping register must not block the other bucket's
+    // normal (non-limited) traffic either — GETs stay open.
+    const afterLimitMeta = await j('/api/meta');
+    check('public reads still work after the rate limit trips', Array.isArray(afterLimitMeta.cities) && afterLimitMeta.cities.length > 0, afterLimitMeta.cities && afterLimitMeta.cities.length);
   } finally {
     child.kill();
   }

@@ -37,8 +37,9 @@ async function loadMeta() {
   setPair('provCheck', 'checkCity', 'Sindh', 'Karachi');
   setPair('provTrend', 'trendCity', 'Punjab', 'Lahore');
   for (const sel of [$('cheapItem'), $('checkItem'), $('trendItem')]) {
-    sel.innerHTML = meta.items.map((i) => `<option value="${esc(i.en)}">${esc(i.en)} (${esc(i.ur)})</option>`).join('');
+    sel.innerHTML = meta.items.map((i) => `<option value="${esc(i.en)}">${esc(i.en)} (${esc(i.ur)}) — ${esc(i.unit)}</option>`).join('');
   }
+  syncCheckLabel();
   $('sources').innerHTML = meta.sources.map((s) => `${esc(s.name)} — ${esc(s.note)}`).join(' · ');
   $('districts').innerHTML = meta.provinces.map((g) => {
     const withRates = g.districts.filter((d) => d.has_rates).length;
@@ -86,6 +87,15 @@ async function loadToday() {
   const mv = await (await fetch('/api/movers?city=' + encodeURIComponent(city) + '&limit=5')).json();
   $('risers').innerHTML = mv.rises.map((r) => `<li>${esc(r.item)}: <span class="up">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';
   $('fallers').innerHTML = mv.falls.map((r) => `<li>${esc(r.item)}: <span class="down">${pct(r.change_pct)}</span> (${fmt(r.wholesale_per_unit)} / ${esc(r.unit)})</li>`).join('') || '<li>—</li>';
+  // Movers sit above the rates table, so a fallback district's movers need
+  // their own label here too — the nearest-rates line by the table is too
+  // far down for a visitor who only reads this section.
+  const mn = $('moversNote');
+  if (mn) {
+    mn.textContent = mv.nearest_rates_from
+      ? `These are ${mv.nearest_rates_from}'s movers (${mv.nearest_rates_date}) — ${city} has no published rates yet, so the nearest rates are shown.`
+      : '';
+  }
   await loadPhotos(city);
   await loadFreshness();
 }
@@ -147,20 +157,38 @@ async function runCheck() {
   const data = await (await fetch('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json();
   const box = $('checkResult');
   if (data.error) { box.textContent = data.error; box.className = 'result'; return; }
+  // The rate's own unit — banana is priced per dozen, not per kg, and the
+  // verdict used to hard-code "/ kg" for every item.
+  const perUnit = data.unit_ur ? ' / ' + data.unit_ur : (data.unit ? ' / ' + data.unit : ' / kg');
   if (data.verdict === 'no-official-rate') {
     box.innerHTML = `<strong>No official retail rate on file</strong> for ${esc(data.item)} yet — so no verdict. ${esc(data.note)} ${data.cheapest_wholesale ? 'Cheapest wholesale today: ' + esc(data.cheapest_wholesale.city) + ' at ' + fmt(data.cheapest_wholesale.per_unit) + ' / ' + esc(data.cheapest_wholesale.unit) + '.' : ''}`;
     box.className = 'result';
     return;
   }
   const words = data.verdict === 'fair' ? 'Fair — you paid at or below the official rate.' : data.verdict === 'slightly-above' ? 'Slightly above the official rate.' : 'Overcharged — you paid more than the official rate.';
-  box.innerHTML = `<strong>${words}</strong><br>Official bazaar rate (${esc(data.city)}, ${esc(data.date)}): ${fmt(data.official_bazaar_rate)} / kg · You paid: ${fmt(data.price_paid)} / kg · Difference: ${fmt(data.difference)} (${data.difference_pct}%).`;
+  box.innerHTML = `<strong>${words}</strong><br>Official bazaar rate (${esc(data.city)}, ${esc(data.date)}): ${fmt(data.official_bazaar_rate)}${perUnit} · You paid: ${fmt(data.price_paid)}${perUnit} · Difference: ${fmt(data.difference)} (${data.difference_pct}%).`;
   box.className = 'result ' + data.verdict;
+}
+// The "price you paid" label follows the selected item's unit, so a dozen
+// item (banana) does not ask for a per-kg price.
+function syncCheckLabel() {
+  const lab = $('checkPriceLabel');
+  const sel = $('checkItem');
+  if (!lab || !sel || !meta) return;
+  const it = meta.items.find((i) => i.en === sel.value);
+  lab.textContent = it && it.unit === 'dozen' ? 'Price you paid (Rs / dozen)' : 'Price you paid (Rs / kg)';
 }
 function drawChart(points) {
   const cv = $('trendChart');
   const ctx = cv.getContext('2d');
   ctx.clearRect(0, 0, cv.width, cv.height);
-  const vals = points.map((p) => p.wholesale_per_unit).filter((v) => v !== null);
+  // Plot the wholesale series when it exists; otherwise the retail series.
+  // Retail-only districts (Peshawar's survey, PBS weekly rows, Islamabad's
+  // Qudrat list, chicken-only districts) used to get "No data" forever
+  // even though their retail history was on file. A point mixes never:
+  // a row has one series or the other for a given city+item.
+  const valueOf = (p) => (p.wholesale_per_unit !== null && p.wholesale_per_unit !== undefined ? p.wholesale_per_unit : p.retail_bazaar);
+  const vals = points.map(valueOf).filter((v) => v !== null && v !== undefined);
   if (points.length === 0 || vals.length === 0) { ctx.font = '18px sans-serif'; ctx.fillText('No data for this selection yet.', 20, 40); return; }
   const min = Math.min(...vals), max = Math.max(...vals);
   const padL = 70, padR = 20, padT = 20, padB = 40;
@@ -170,14 +198,15 @@ function drawChart(points) {
   ctx.strokeStyle = '#e5e7eb';
   for (let g = 0; g <= 4; g++) { const y = padT + (H / 4) * g; ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + W, y); ctx.stroke(); }
   ctx.strokeStyle = '#15803d'; ctx.lineWidth = 3; ctx.beginPath();
-  points.forEach((p, i) => { if (p.wholesale_per_unit === null) return; const x = X(i), y = Y(p.wholesale_per_unit); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+  points.forEach((p, i) => { const v = valueOf(p); if (v === null || v === undefined) return; const x = X(i), y = Y(v); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
   ctx.stroke(); ctx.lineWidth = 1;
   ctx.fillStyle = '#14532d'; ctx.font = '13px sans-serif';
   points.forEach((p, i) => {
-    if (p.wholesale_per_unit === null) return;
-    const x = X(i), y = Y(p.wholesale_per_unit);
+    const v = valueOf(p);
+    if (v === null || v === undefined) return;
+    const x = X(i), y = Y(v);
     ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.fillText('Rs ' + p.wholesale_per_unit, x - 20, y - 12);
+    ctx.fillText('Rs ' + v, x - 20, y - 12);
     ctx.fillText(p.date, x - 24, cv.height - 12);
   });
   ctx.fillText('Rs ' + max, 8, padT + 12);
@@ -203,6 +232,7 @@ async function askChat() {
 $('chatBtn').addEventListener('click', askChat);
 $('chatQ').addEventListener('keydown', (e) => { if (e.key === 'Enter') askChat(); });
 if ($('catSelect')) $('catSelect').addEventListener('change', loadToday);
+if ($('checkItem')) $('checkItem').addEventListener('change', syncCheckLabel);
 $('cheapBtn').addEventListener('click', loadCheapest);
 $('checkBtn').addEventListener('click', runCheck);
 $('trendBtn').addEventListener('click', loadTrend);

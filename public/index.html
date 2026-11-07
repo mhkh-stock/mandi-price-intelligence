@@ -54,6 +54,7 @@
 
 <section id="movers" class="section">
   <h2>Today's biggest movers</h2>
+  <p id="moversNote" class="note"></p>
   <div class="movers-grid">
     <div class="card">
       <h3>▲ Mehnga hua (risers)</h3>
@@ -112,7 +113,7 @@
     <label>Province <select id="provCheck"></select></label>
     <label>District <select id="checkCity"></select></label>
     <label>Item <select id="checkItem"></select></label>
-    <label>Price you paid (Rs / kg) <input id="checkPrice" type="number" min="0" step="0.5" placeholder="e.g. 220"></label>
+    <label><span id="checkPriceLabel">Price you paid (Rs / kg)</span> <input id="checkPrice" type="number" min="0" step="0.5" placeholder="e.g. 220"></label>
     <button id="checkBtn">Check</button>
   </div>
   <div id="checkResult" class="result"></div>

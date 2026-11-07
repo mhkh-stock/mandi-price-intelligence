@@ -857,10 +857,20 @@ function approveReviewRow(row, decidedBy) {
   const ci = cityId(row.district);
   const ii = itemId(row.item, '', row.unit || 'kg');
   if (row.kind === 'wholesale') {
+    // Wholesale is stored Rs/100kg for kg items (the AMIS convention) and
+    // as-is per dozen for dozen items — the same rule as a district head's
+    // direct rate entry. Human proposals (manager / head / master) are
+    // entered per unit — "Rs per kg" on the proposal form — so a kg
+    // wholesale price is multiplied by 100 here. The ONE exception is
+    // the AMIS ViewPrices system proposer, whose price is already the
+    // FQP in Rs/100kg. Approving a human wholesale proposal without
+    // this step used to publish it 100x too low (Rs 175/kg showed as
+    // Rs 1.75/kg); the review-queue docs now state the per-kg rule.
+    const stored = row.unit === 'kg' && row.proposed_by !== 'amis-viewprices' ? row.price * 100 : row.price;
     db.prepare(`INSERT INTO snapshots(city_id, item_id, variant, date, wholesale, source, place)
       VALUES(?,?,?,?,?,?,?)
       ON CONFLICT(city_id, item_id, variant, date, source) DO UPDATE SET wholesale=excluded.wholesale, place=excluded.place`)
-      .run(ci, ii, row.variant || '', row.date, row.price, row.source, row.place || '');
+      .run(ci, ii, row.variant || '', row.date, stored, row.source, row.place || '');
   } else {
     db.prepare(`INSERT INTO snapshots(city_id, item_id, variant, date, retail_bazaar, source, place)
       VALUES(?,?,?,?,?,?,?)
@@ -935,8 +945,12 @@ function answerChat(q) {
   if (!district) return ask(isUrdu ? `${item.name_en} (${item.name_ur}) kis district mein? District ka naam batayein.` : `Which district for ${item.name_en}? Please name the district.`);
   const fmtRate = (r, src) => {
     const parts = [];
-    if (r.wholesale_per_unit !== null && r.wholesale_per_unit !== undefined) parts.push(isUrdu ? `thok (wholesale) Rs ${r.wholesale_per_unit} fi ${unitUrdu(r.unit)}` : `wholesale Rs ${r.wholesale_per_unit} per ${unitUrdu(r.unit)}`);
-    if (r.retail_bazaar !== null && r.retail_bazaar !== undefined) parts.push(isUrdu ? `bazaar retail Rs ${r.retail_bazaar} fi ${unitUrdu(r.unit)}` : `retail Rs ${r.retail_bazaar} per ${unitUrdu(r.unit)}`);
+    // English answers say "per kg" / "per dozen" in English; Urdu answers
+    // keep the Urdu unit word (فی کلو / فی درجن). The English branch used
+    // to say "per کلو", mixing scripts mid-sentence.
+    const perEn = r.unit === 'dozen' ? 'per dozen' : 'per kg';
+    if (r.wholesale_per_unit !== null && r.wholesale_per_unit !== undefined) parts.push(isUrdu ? `thok (wholesale) Rs ${r.wholesale_per_unit} fi ${unitUrdu(r.unit)}` : `wholesale Rs ${r.wholesale_per_unit} ${perEn}`);
+    if (r.retail_bazaar !== null && r.retail_bazaar !== undefined) parts.push(isUrdu ? `bazaar retail Rs ${r.retail_bazaar} fi ${unitUrdu(r.unit)}` : `retail Rs ${r.retail_bazaar} ${perEn}`);
     return parts.join(isUrdu ? ' — ' : ' · ');
   };
   const drow = db.prepare(`SELECT MAX(s.date) d FROM snapshots s JOIN items i ON i.id=s.item_id JOIN cities c ON c.id=s.city_id WHERE i.name_en=? AND c.name=?`).get(item.name_en, district);
@@ -1088,8 +1102,15 @@ function sendJson(res, code, obj) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    // An oversized body destroys the request stream, so 'end' never
+    // fires — without the 'close' handler the caller would wait forever
+    // and the socket would hang. A destroyed body resolves as null
+    // (invalid JSON), so the endpoint answers 400 instead of hanging.
     req.on('data', (c) => { data += c; if (data.length > 200000) req.destroy(); });
-    req.on('end', () => { try { resolve(data ? JSON.parse(data) : {}); } catch { resolve(null); } });
+    req.on('end', () => { try { finish(data ? JSON.parse(data) : {}); } catch { finish(null); } });
+    req.on('close', () => finish(null));
     req.on('error', reject);
   });
 }
@@ -1158,7 +1179,8 @@ const server = http.createServer(async (req, res) => {
     }
     if (p === '/api/movers' && req.method === 'GET') {
       const city = url.searchParams.get('city') || 'Lahore';
-      const limit = Math.min(10, Math.max(1, Number(url.searchParams.get('limit') || 5)));
+      const rawLimit = Number(url.searchParams.get('limit') || 5);
+      const limit = Math.min(10, Math.max(1, Number.isFinite(rawLimit) ? rawLimit : 5));
       return sendJson(res, 200, { city, ...movers(city, limit) });
     }
     if (p === '/api/history' && req.method === 'GET') {
@@ -1190,7 +1212,9 @@ const server = http.createServer(async (req, res) => {
         ORDER BY s.date DESC LIMIT 1`).get(body.item);
       if (!row) {
         const w = cheapest(body.item);
-        return sendJson(res, 200, { item: body.item, verdict: 'no-official-rate',
+        const itemUnit = db.prepare('SELECT unit FROM items WHERE name_en=?').get(body.item);
+        const unit = itemUnit ? itemUnit.unit : 'kg';
+        return sendJson(res, 200, { item: body.item, verdict: 'no-official-rate', unit, unit_ur: unitUrdu(unit),
           note: 'No official retail rate on file for this item yet. Wholesale comparison below is not a retail verdict.',
           cheapest_wholesale: w.rows[0] || null });
       }
@@ -1199,7 +1223,9 @@ const server = http.createServer(async (req, res) => {
       let verdict = 'fair';
       if (pct > 10) verdict = 'overcharged';
       else if (pct > 0) verdict = 'slightly-above';
-      return sendJson(res, 200, { item: body.item, city: row.city, date: row.date,
+      const itemUnit = db.prepare('SELECT unit FROM items WHERE name_en=?').get(body.item);
+      const unit = itemUnit ? itemUnit.unit : 'kg';
+      return sendJson(res, 200, { item: body.item, city: row.city, date: row.date, unit, unit_ur: unitUrdu(unit),
         official_bazaar_rate: row.rb, price_paid: paid, difference: Math.round(diff * 100) / 100,
         difference_pct: Math.round(pct * 100) / 100, verdict });
     }
@@ -1531,8 +1557,15 @@ const server = http.createServer(async (req, res) => {
       const acct = db.prepare('SELECT status FROM district_admins WHERE username=?').get(username);
       if (!acct) return sendJson(res, 404, { error: 'unknown account' });
       if (acct.status !== 'pending') return sendJson(res, 400, { error: 'scans can only be attached while the account is pending approval' });
-      const doc = db.prepare('SELECT id FROM account_documents WHERE username=? AND doc_number=?').get(username, docNumber);
+      const doc = db.prepare('SELECT id, scan_path FROM account_documents WHERE username=? AND doc_number=?').get(username, docNumber);
       if (!doc) return sendJson(res, 404, { error: 'no such document on this account — register the document first' });
+      // A scan is a credential document, and this endpoint has no auth
+      // (the account is still pending, so there is no token yet) — anyone
+      // who knows the username + doc number could otherwise silently
+      // REPLACE the officer's real scan with a fake one before approval.
+      // The first upload wins; a wrong scan is replaced by the master,
+      // never by re-uploading here.
+      if (doc.scan_path) return sendJson(res, 409, { error: 'a scan is already attached to this document — contact the master (mhkh3200@gmail.com) to replace it' });
       const stored = 'scan-' + crypto.randomBytes(16).toString('hex') + ext;
       try {
         fs.writeFileSync(path.join(UPLOADS_DIR, stored), file.data);
@@ -2175,6 +2208,13 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       if (!body || body.code !== ADMIN_CODE) return sendJson(res, 403, { error: 'bad admin code' });
       if (!body.city || !body.item || !body.date) return sendJson(res, 400, { error: 'city, item and date required' });
+      if (!isValidRateDate(body.date)) return sendJson(res, 400, { error: 'date must be YYYY-MM-DD and not in the future' });
+      for (const k of ['wholesale', 'retail_bazaar', 'retail_mandi', 'retail_auction']) {
+        if (body[k] !== undefined && body[k] !== null) {
+          const v = Number(body[k]);
+          if (!Number.isFinite(v) || v < 0) return sendJson(res, 400, { error: k + ' must be a number of 0 or more' });
+        }
+      }
       // v3.1 official-district rule: once a district has an active licensed
       // head, its rates are managed ONLY by that head. The master's direct
       // entries for it are rejected — the head enters the rates, or they go

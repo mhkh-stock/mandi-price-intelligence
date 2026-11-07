@@ -250,7 +250,7 @@ it to the repo.
 ## Run
 ```sh
 node server.js          # http://127.0.0.1:3030
-node test.js            # 175 checks on fresh DBs (all must pass)
+node test.js            # 355 checks on fresh DBs (all must pass)
 ```
 
 ## Honest limits

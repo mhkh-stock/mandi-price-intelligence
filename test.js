@@ -151,6 +151,12 @@ async function waitReady(port) {
     check('checker: 220 vs official 196 = overcharged +24', over.verdict === 'overcharged' && over.official_bazaar_rate === 196 && over.difference === 24, over);
     const fair = await j('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ city: 'Karachi', item: 'Tomato', price_paid: 190 }) });
     check('checker: 190 vs 196 = fair', fair.verdict === 'fair', fair);
+    const banCheck = await j('/api/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ city: 'Peshawar', item: 'Banana', price_paid: 125 }) });
+    check('checker: banana carries its own unit (dozen / درجن), not a hard-coded kg',
+      banCheck.verdict === 'fair' && banCheck.unit === 'dozen' && banCheck.unit_ur === 'درجن' && banCheck.official_bazaar_rate === 125, banCheck);
+    const mvBadLimit = await j('/api/movers?city=Lahore&limit=abc');
+    check('movers: a non-numeric limit falls back to the default instead of returning empty',
+      Array.isArray(mvBadLimit.rises) && mvBadLimit.rises.length >= 1 && mvBadLimit.rises.length <= 5, mvBadLimit);
     const hist = await j('/api/history?item=Tomato&city=Lahore');
     check('history Lahore tomato has 4 points', hist.points.length === 4, hist.points);
     const bad = await j('/api/admin/snapshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: 'wrong', city: 'TestCity', item: 'Onion', date: '2026-11-05' }) });
@@ -159,6 +165,10 @@ async function waitReady(port) {
     check('admin accepts correct code', ok.ok === true, ok);
     const tc = await j('/api/today?city=TestCity');
     check('admin snapshot appears in today', tc.rows.some((r) => r.item === 'Onion' && r.wholesale_per_unit === 150), tc.rows);
+    const snapFuture = await j('/api/admin/snapshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, city: 'TestCity', item: 'Onion', date: '2999-01-01', wholesale: 15000, source: 'test' }) });
+    check('admin snapshot with a future date is rejected', snapFuture.error === 'date must be YYYY-MM-DD and not in the future', snapFuture);
+    const snapBadPrice = await j('/api/admin/snapshot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, city: 'TestCity', item: 'Onion', date: '2026-11-05', wholesale: 'abc', source: 'test' }) });
+    check('admin snapshot with a non-numeric price is rejected', snapBadPrice.error === 'wholesale must be a number of 0 or more', snapBadPrice);
     const home = await fetch(BASE + '/');
     check('homepage serves 200', home.status === 200, home.status);
     const homeHtml = await home.text();
@@ -442,6 +452,24 @@ async function waitReady(port) {
     const nowsOnion = await j('/api/today?city=Nowshera');
     check('approved Nowshera onion 120 shows to the public with its source',
       nowsOnion.rows.some((r) => r.item === 'Onion' && r.retail_bazaar === 120 && r.source === 'Nowshera market list'), nowsOnion);
+    // Review-queue wholesale convention: proposals are entered per unit
+    // ("Rs per kg" on the form, like a head's direct entry), and approval
+    // must store them as Rs/100kg — approving 175/kg used to publish
+    // Rs 1.75/kg. A dozen proposal stays per dozen.
+    const rqWs = await j('/api/review/propose', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, item: 'Tomato', district: 'Harnai', price: 175, unit: 'kg', kind: 'wholesale', source: 'Harnai market list', date: todayStr }) });
+    check('wholesale proposal (per kg) enters the queue', rqWs.ok === true && Number.isFinite(rqWs.id), rqWs);
+    const rqWsOk = await j('/api/review/decide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, id: rqWs.id, decision: 'approve' }) });
+    check('wholesale proposal approves', rqWsOk.ok === true && rqWsOk.decision === 'approved', rqWsOk);
+    const harnai = await j('/api/today?city=Harnai');
+    check('approved wholesale proposal publishes as 175/kg (not 1.75)',
+      harnai.rows.some((r) => r.item === 'Tomato' && r.wholesale_per_unit === 175 && r.source === 'Harnai market list'), harnai);
+    const rqDz = await j('/api/review/propose', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, item: 'Banana', district: 'Chagai', price: 125, unit: 'dozen', kind: 'wholesale', source: 'Chagai market list', date: todayStr }) });
+    check('wholesale dozen proposal enters the queue', rqDz.ok === true && Number.isFinite(rqDz.id), rqDz);
+    const rqDzOk = await j('/api/review/decide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, id: rqDz.id, decision: 'approve' }) });
+    check('wholesale dozen proposal approves', rqDzOk.ok === true && rqDzOk.decision === 'approved', rqDzOk);
+    const zhob = await j('/api/today?city=Chagai');
+    check('approved wholesale dozen proposal publishes as 125/dozen',
+      zhob.rows.some((r) => r.item === 'Banana' && r.wholesale_per_unit === 125 && r.unit === 'dozen'), zhob);
 
     // ---- v3.0: district-admin login lockout ----
     const daLock = await j('/api/admin/district-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: CODE, username: 'lockout-admin', password: 'StrongPass1', district: 'Mardan', officer_name: 'Lockout Officer', designation: 'District Food Controller', documents: [{ doc_type: 'Posting-Transfer Order', doc_number: 'DFC-MRD-2026-009', issuing_authority: 'Food Department, Khyber Pakhtunkhwa', issue_date: '2026-01-10' }] }) });
@@ -705,6 +733,9 @@ async function waitReady(port) {
     const m2ScanUp = await postMultipart('/api/register/scan', null, { username: 'gujrat-head-2', doc_number: 'PPSC-2024-302' }, 'scan', png1, 'letter.png', 'image/png');
     check('scan upload works for a pending account',
       m2ScanUp.status === 200 && m2ScanUp.body && m2ScanUp.body.ok === true && m2ScanUp.body.has_scan === true, m2ScanUp);
+    const m2ScanOverwrite = await postMultipart('/api/register/scan', null, { username: 'gujrat-head-2', doc_number: 'PPSC-2024-302' }, 'scan', png1, 'letter2.png', 'image/png');
+    check('a second scan upload cannot silently replace the first (409 — first upload wins)',
+      m2ScanOverwrite.status === 409 && m2ScanOverwrite.body && /already attached/.test(m2ScanOverwrite.body.error || ''), m2ScanOverwrite);
     const m2ScanNoAuth = await fetch(BASE + '/api/documents/scan/' + m2ScanDocId);
     check('licence scan is not public (no auth → 403)', m2ScanNoAuth.status === 403, m2ScanNoAuth.status);
     const m2ScanMaster = await fetch(BASE + '/api/documents/scan/' + m2ScanDocId, { headers: { 'X-Master-Code': CODE } });
@@ -1054,7 +1085,11 @@ async function waitReady(port) {
         try { const live = await get('/api/live'); if (pred(live)) return live; } catch {}
         await sleep(200);
       }
-      return get('/api/live');
+      // The final read used to be uncaught: if the server was briefly
+      // unreachable here, fetch threw and the WHOLE suite crashed with
+      // no FAIL line (seen once in 5 runs, port 3041). A failed read is
+      // a failed check, not a crash — return {} and let the checks fail.
+      try { return await get('/api/live'); } catch { return {}; }
     }
 
     // Server 2: the fixture answers, so the startup refresh must succeed.
